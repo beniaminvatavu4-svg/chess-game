@@ -1,0 +1,34 @@
+<div class="game-page">
+  <div class="status-bar">
+    <span class="color-badge color-{{ color }}">Playing as {{ color }}</span>
+    <span class="status-msg">{{ statusMessage }}</span>
+  </div>
+
+  @if (game?.status === 'waiting') {
+    <div class="waiting-banner">
+      <span>Așteaptă adversarul — trimite-i link-ul:</span>
+      <div class="share-row">
+        <input class="share-url" readonly [value]="joinUrl" />
+        <button class="btn-copy" (click)="copyUrl()">Copiază</button>
+      </div>
+    </div>
+  }
+
+  <div class="board">
+    @for (rank of board; track $index) {
+      <div class="rank">
+        @for (sq of rank; track sq.square) {
+          <div
+            class="square"
+            [class.light]="sq.isLight"
+            [class.dark]="!sq.isLight"
+            [class.selected]="sq.isSelected"
+            [class.valid-move]="sq.isValidMove"
+            (click)="onSquareClick(sq)">
+            <span class="piece">{{ pieceSymbol(sq.piece) }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

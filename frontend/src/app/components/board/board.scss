@@ -1,0 +1,106 @@
+.game-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  font-family: sans-serif;
+}
+
+.status-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.color-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.color-white { background: #f5f5f5; border: 1px solid #ccc; color: #333; }
+.color-black { background: #333; color: #fff; }
+
+.status-msg { font-size: 1rem; color: #555; }
+
+.board {
+  border: 2px solid #444;
+  display: inline-block;
+}
+
+.rank { display: flex; }
+
+.square {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.light { background: #f0d9b5; }
+.dark  { background: #b58863; }
+.selected { outline: 4px solid #f6f669; outline-offset: -4px; background-color: rgba(246,246,105,0.35) !important; }
+.valid-move::after {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+.valid-move:has(.piece:not(:empty))::after {
+  width: 68px;
+  height: 68px;
+  background: transparent;
+  border: 4px solid rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+}
+
+.piece { font-size: 48px; line-height: 1; z-index: 1; }
+
+.waiting-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: #fff8e1;
+  border: 1px solid #f9a825;
+  border-radius: 6px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: #5d4037;
+}
+
+.share-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.share-url {
+  width: 320px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: #333;
+}
+
+.btn-copy {
+  padding: 6px 14px;
+  background: #f9a825;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #333;
+  &:hover { background: #f59f00; }
+}

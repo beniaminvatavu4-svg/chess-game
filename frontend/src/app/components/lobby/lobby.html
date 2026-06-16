@@ -1,0 +1,25 @@
+<div class="lobby">
+  <h1>Chess Game</h1>
+  <button class="btn-primary" (click)="createGame()">Create New Game</button>
+  <button class="btn-secondary" (click)="loadGames()">Refresh</button>
+
+  <section class="game-list">
+    <h2>Available Games</h2>
+    @if (games.length === 0) {
+      <p class="empty">No games available. Create one to start playing!</p>
+    } @else {
+      @for (game of games; track game.id) {
+        <div class="game-card">
+          <span class="game-id">{{ game.id | slice:0:8 }}…</span>
+          <span class="game-status status-{{ game.status }}">{{ game.status }}</span>
+          <button
+            class="btn-join"
+            [disabled]="game.status !== 'waiting'"
+            (click)="joinGame(game.id)">
+            Join as Black
+          </button>
+        </div>
+      }
+    }
+  </section>
+</div>
