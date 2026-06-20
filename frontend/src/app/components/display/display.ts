@@ -11,6 +11,8 @@ interface BoardSquare {
   piece: string | null;
   isLight: boolean;
   isLastMove: boolean;
+  rankLabel: string | null;
+  fileLabel: string | null;
 }
 
 @Component({
@@ -103,6 +105,8 @@ export class DisplayComponent implements OnInit, OnDestroy {
           piece: cell ? `${cell.color}${cell.type}` : null,
           isLight: (ri + fi) % 2 === 0,
           isLastMove: square === lastFrom || square === lastTo,
+          rankLabel: fi === 0 ? square[1] : null,
+          fileLabel: ri === 7 ? square[0] : null,
         };
       }),
     );

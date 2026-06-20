@@ -12,6 +12,8 @@ interface BoardSquare {
   isLight: boolean;
   isSelected: boolean;
   isValidMove: boolean;
+  rankLabel: string | null;
+  fileLabel: string | null;
 }
 
 @Component({
@@ -71,6 +73,8 @@ export class BoardComponent implements OnInit, OnDestroy {
           isLight: (ri + fi) % 2 === 0,
           isSelected: square === this.selectedSquare,
           isValidMove: false,
+          rankLabel: fi === 0 ? square[1] : null,
+          fileLabel: ri === ranks.length - 1 ? square[0] : null,
         };
       });
     });

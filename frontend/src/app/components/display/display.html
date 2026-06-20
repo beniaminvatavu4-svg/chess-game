@@ -37,6 +37,8 @@
               [class.light]="sq.isLight"
               [class.dark]="!sq.isLight"
               [class.last-move]="sq.isLastMove">
+              @if (sq.rankLabel) { <span class="coord rank-coord">{{ sq.rankLabel }}</span> }
+              @if (sq.fileLabel) { <span class="coord file-coord">{{ sq.fileLabel }}</span> }
               <span class="piece"
                 [class.piece-w]="sq.piece?.[0] === 'w'"
                 [class.piece-b]="sq.piece?.[0] === 'b'">{{ pieceSymbol(sq.piece) }}</span>

@@ -25,8 +25,10 @@
 .status-msg { font-size: 1rem; color: #555; }
 
 .board {
-  border: 2px solid #444;
+  border: 3px solid #2a3a5c;
   display: inline-block;
+  border-radius: 2px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
 }
 
 .rank { display: flex; }
@@ -42,44 +44,65 @@
   user-select: none;
 }
 
-.light { background: #f0d9b5; }
-.dark  { background: #b58863; }
-.selected { outline: 4px solid #f6f669; outline-offset: -4px; background-color: rgba(246,246,105,0.35) !important; }
+.light { background: #b0c4de; }
+.dark  { background: #6b8cba; }
+
+.selected {
+  background-color: rgba(20, 200, 60, 0.45) !important;
+  box-shadow: inset 0 0 0 3px rgba(20, 210, 60, 0.95);
+}
+
 .valid-move::after {
   content: '';
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(20, 180, 50, 0.55);
   pointer-events: none;
+  z-index: 1;
 }
-.valid-move:has(.piece:not(:empty))::after {
+.valid-move:has(.piece-w)::after,
+.valid-move:has(.piece-b)::after {
   width: 68px;
   height: 68px;
   background: transparent;
-  border: 4px solid rgba(0, 0, 0, 0.4);
+  border: 4px solid rgba(20, 180, 50, 0.65);
   border-radius: 50%;
 }
 
 .piece {
   font-size: 48px;
   line-height: 1;
-  z-index: 1;
+  z-index: 2;
   font-family: 'Segoe UI Symbol', 'Noto Chess', 'Apple Color Emoji', sans-serif;
 }
 
 .piece-w {
-  color: #fffef0;
-  -webkit-text-stroke: 1.8px #2a2a2a;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+  color: #ffffff;
+  -webkit-text-stroke: 1.8px #1a1a1a;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.55));
 }
 
 .piece-b {
-  color: #1a1a1a;
-  -webkit-text-stroke: 0.5px rgba(255,255,255,0.1);
+  color: #111111;
   filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
 }
+
+// Coordinate labels
+.coord {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 3;
+  pointer-events: none;
+  font-family: sans-serif;
+}
+.rank-coord { top: 3px; left: 4px; }
+.file-coord { bottom: 2px; right: 4px; }
+.light .coord { color: #6b8cba; }
+.dark  .coord { color: #b0c4de; }
 
 .waiting-banner {
   display: flex;
