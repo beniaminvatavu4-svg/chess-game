@@ -45,6 +45,7 @@ router.post('/', async (req: Request, res: Response) => {
       winner: null,
       currentTurn: 'w',
       lastMove: null,
+      moveCount: 0,
     },
     sockets: {
       white: null,
@@ -53,7 +54,6 @@ router.post('/', async (req: Request, res: Response) => {
       audience: new Set(),
     },
     activeEvent: null,
-    eventTimer: null,
     qr: { joinBlack: qrJoinBlack, audience: qrAudience },
     createdAt: new Date(),
   };

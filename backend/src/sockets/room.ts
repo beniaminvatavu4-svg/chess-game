@@ -11,24 +11,16 @@ import {
   EventResultPayload,
 } from '../types';
 
-// Configurabil prin variabile de mediu
-const EVENT_INTERVAL_MS = parseInt(process.env.EVENT_INTERVAL_MS ?? '300000', 10); // default 5 min
-const EVENT_DURATION_S = parseInt(process.env.EVENT_DURATION_S ?? '30', 10);       // default 30 s
+const MOVES_PER_EVENT = 6; // event triggers every N total moves
+const EVENT_DURATION_S = parseInt(process.env.EVENT_DURATION_S ?? '30', 10);
 
 const SOCKET_ROOM = (roomId: string) => `room:${roomId}`;
 
-// ─── Event scheduling ────────────────────────────────────────────────────────
-
-function scheduleNextEvent(io: Server, room: Room): void {
-  if (room.eventTimer) clearTimeout(room.eventTimer);
-  room.eventTimer = setTimeout(() => startEvent(io, room), EVENT_INTERVAL_MS);
-}
+// ─── Event lifecycle ─────────────────────────────────────────────────────────
 
 function startEvent(io: Server, room: Room): void {
-  if (room.chess.status !== 'active') {
-    scheduleNextEvent(io, room);
-    return;
-  }
+  if (room.chess.status !== 'active') return;
+  if (room.activeEvent) return; // already running
 
   const def = pickRandomEvent();
   const event: ActiveEvent = {
@@ -84,11 +76,9 @@ function finalizeEvent(io: Server, room: Room): void {
 
   applyEventEffect(room, event.eventId, winningOption);
 
-  // Broadcast updated board after effect (FEN may have changed)
   io.to(SOCKET_ROOM(room.roomId)).emit('room:boardUpdate', getBoardUpdate(room));
 
   room.activeEvent = null;
-  scheduleNextEvent(io, room);
 }
 
 // ─── Socket handlers ─────────────────────────────────────────────────────────
@@ -120,10 +110,8 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
         return;
       }
 
-      // Activate game when both players are present
       if (room.sockets.white && room.sockets.black && room.chess.status === 'waiting') {
         room.chess.status = 'active';
-        scheduleNextEvent(io, room);
       }
     } else if (role === 'spectator') {
       room.sockets.spectators.add(socket.id);
@@ -153,7 +141,6 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
     };
     socket.emit('room:state', state);
 
-    // Inform everyone of updated player presence
     io.to(SOCKET_ROOM(roomId)).emit('room:boardUpdate', getBoardUpdate(room));
   });
 
@@ -179,6 +166,7 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
       room.chess.fen = chess.fen();
       room.chess.currentTurn = chess.turn() as 'w' | 'b';
       room.chess.lastMove = move;
+      room.chess.moveCount++;
 
       if (chess.isGameOver()) {
         room.chess.status = 'finished';
@@ -186,8 +174,9 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
           ? chess.turn() === 'w' ? 'black' : 'white'
           : 'draw';
 
-        if (room.eventTimer) { clearTimeout(room.eventTimer); room.eventTimer = null; }
         if (room.activeEvent) finalizeEvent(io, room);
+      } else if (room.chess.moveCount % MOVES_PER_EVENT === 0) {
+        startEvent(io, room);
       }
 
       io.to(SOCKET_ROOM(roomId)).emit('room:boardUpdate', getBoardUpdate(room));
@@ -201,7 +190,7 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
     if (!room?.activeEvent) return;
 
     const event = room.activeEvent;
-    if (event.deviceVotes.has(deviceId)) return; // one vote per device
+    if (event.deviceVotes.has(deviceId)) return;
 
     event.deviceVotes.set(deviceId, option);
     event.votes[option]++;
@@ -210,7 +199,7 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
   socket.on('disconnecting', () => {
     for (const socketRoom of socket.rooms) {
       if (!socketRoom.startsWith('room:')) continue;
-      const roomId = socketRoom.slice(5); // strip 'room:' prefix
+      const roomId = socketRoom.slice(5);
       const room = rooms.get(roomId);
       if (!room) continue;
 

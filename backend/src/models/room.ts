@@ -21,6 +21,7 @@ export interface Room {
     winner: 'white' | 'black' | 'draw' | null;
     currentTurn: 'w' | 'b';
     lastMove: string | null;
+    moveCount: number;
   };
   sockets: {
     white: string | null;
@@ -29,7 +30,6 @@ export interface Room {
     audience: Set<string>;
   };
   activeEvent: ActiveEvent | null;
-  eventTimer: ReturnType<typeof setTimeout> | null;
   qr: {
     joinBlack: string;
     audience: string;

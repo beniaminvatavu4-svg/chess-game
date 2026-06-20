@@ -25,7 +25,9 @@
             [class.selected]="sq.isSelected"
             [class.valid-move]="sq.isValidMove"
             (click)="onSquareClick(sq)">
-            <span class="piece">{{ pieceSymbol(sq.piece) }}</span>
+            <span class="piece"
+              [class.piece-w]="sq.piece?.[0] === 'w'"
+              [class.piece-b]="sq.piece?.[0] === 'b'">{{ pieceSymbol(sq.piece) }}</span>
           </div>
         }
       </div>
