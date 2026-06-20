@@ -1,0 +1,53 @@
+<div class="player-page">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="color-badge" [class.white]="color === 'white'" [class.black]="color === 'black'">
+      {{ color === 'white' ? '♔ Alb' : '♚ Negru' }}
+    </span>
+    <span class="status-msg">{{ statusMessage }}</span>
+    <span class="room-id">{{ roomId }}</span>
+  </div>
+
+  <!-- Event overlay -->
+  @if (activeEvent) {
+    <div class="event-banner">
+      <div class="event-question">{{ activeEvent.question }}</div>
+      <div class="event-countdown">{{ activeEvent.secondsLeft }}s</div>
+      <div class="event-options">
+        <span class="opt">{{ activeEvent.options[0] }}</span>
+        <span class="vs">vs</span>
+        <span class="opt">{{ activeEvent.options[1] }}</span>
+      </div>
+      <p class="event-note">Publicul votează acum…</p>
+    </div>
+  }
+
+  @if (eventResult) {
+    <div class="event-result">
+      <span class="trophy">🏆</span>
+      <span>{{ eventResult.options ? eventResult.options[eventResult.winningOption] : 'Opțiunea ' + (eventResult.winningOption + 1) }} câștigă!</span>
+      <span class="votes">({{ eventResult.votes[0] }} vs {{ eventResult.votes[1] }} voturi)</span>
+    </div>
+  }
+
+  <!-- Chess board -->
+  <div class="board">
+    @for (rank of board; track $index) {
+      <div class="rank">
+        @for (sq of rank; track sq.square) {
+          <div
+            class="square"
+            [class.light]="sq.isLight"
+            [class.dark]="!sq.isLight"
+            [class.selected]="sq.isSelected"
+            [class.valid-move]="sq.isValidMove"
+            (click)="onSquareClick(sq)">
+            <span class="piece">{{ pieceSymbol(sq.piece) }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>

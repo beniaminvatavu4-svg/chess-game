@@ -1,0 +1,57 @@
+<div class="display-page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="room-code">{{ roomId }}</div>
+    <div class="status-msg">{{ statusMessage }}</div>
+  </div>
+
+  <!-- Event overlay -->
+  @if (activeEvent) {
+    <div class="event-overlay">
+      <div class="event-question">{{ activeEvent.question }}</div>
+      <div class="event-options">
+        <div class="opt-box">{{ activeEvent.options[0] }}</div>
+        <div class="event-timer">{{ activeEvent.secondsLeft }}s</div>
+        <div class="opt-box">{{ activeEvent.options[1] }}</div>
+      </div>
+      <p class="event-hint">Scanează QR-ul pentru a vota!</p>
+    </div>
+  }
+
+  @if (eventResult) {
+    <div class="event-result-overlay">
+      🏆 <strong>{{ eventResult.options ? eventResult.options[eventResult.winningOption] : 'Opțiunea ' + (eventResult.winningOption + 1) }}</strong> câștigă votul!
+      <span class="vote-count">({{ eventResult.votes[0] }} – {{ eventResult.votes[1] }})</span>
+    </div>
+  }
+
+  <!-- Main layout: board + QR -->
+  <div class="main-layout">
+    <div class="board">
+      @for (rank of board; track $index) {
+        <div class="rank">
+          @for (sq of rank; track sq.square) {
+            <div
+              class="square"
+              [class.light]="sq.isLight"
+              [class.dark]="!sq.isLight"
+              [class.last-move]="sq.isLastMove">
+              <span class="piece">{{ pieceSymbol(sq.piece) }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Audience QR -->
+    @if (qrAudience) {
+      <div class="audience-panel">
+        <p class="qr-label">Votează în timp real</p>
+        <img [src]="qrAudience" alt="QR Audience" class="qr-img" />
+        <p class="qr-hint">/audience/{{ roomId }}</p>
+      </div>
+    }
+  </div>
+
+</div>

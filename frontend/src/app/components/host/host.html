@@ -1,0 +1,45 @@
+<div class="host-page">
+  <h1>Chess Live Event</h1>
+
+  @if (!room) {
+    <div class="create-section">
+      <p>Creează un meci nou pentru a genera codurile QR</p>
+      <button class="btn-primary" [disabled]="loading" (click)="createRoom()">
+        {{ loading ? 'Se creează…' : 'Creează meci' }}
+      </button>
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+    </div>
+  } @else {
+    <div class="setup-grid">
+
+      <div class="qr-card">
+        <h2>Jucătorul 2 — Negru</h2>
+        <p class="hint">Scanează pentru a te alătura ca jucător</p>
+        <img [src]="room.qrJoinBlack" alt="QR Jucător 2" class="qr-img" />
+        <code class="room-code">{{ room.roomId }}</code>
+      </div>
+
+      <div class="actions-panel">
+        <div class="room-badge">
+          <span class="label">Cod meci</span>
+          <span class="code">{{ room.roomId }}</span>
+        </div>
+
+        <button class="btn-primary btn-play" (click)="goToPlay()">
+          Joacă ca Alb →
+        </button>
+
+        <div class="spectate-block">
+          <span class="label">Ecran public (Display)</span>
+          <div class="copy-row">
+            <code>{{ spectateUrl }}</code>
+            <button class="btn-copy" (click)="copySpectateUrl()">Copiază</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

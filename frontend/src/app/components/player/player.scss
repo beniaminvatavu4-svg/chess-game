@@ -1,0 +1,112 @@
+.player-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  font-family: sans-serif;
+  background: #1a1a2e;
+  min-height: 100vh;
+  color: #eee;
+}
+
+.status-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 576px;
+  justify-content: space-between;
+}
+
+.color-badge {
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  &.white { background: #f5f5f5; color: #333; }
+  &.black { background: #333; color: #eee; border: 1px solid #555; }
+}
+
+.status-msg { font-size: 0.95rem; color: #ccc; flex: 1; text-align: center; }
+.room-id { font-size: 0.75rem; color: #555; letter-spacing: 0.1em; }
+
+// Event banner
+.event-banner {
+  width: 100%;
+  max-width: 576px;
+  background: #0f3460;
+  border: 2px solid #e94560;
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 12px;
+  text-align: center;
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+.event-question { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
+.event-countdown { font-size: 2rem; font-weight: 700; color: #e94560; margin-bottom: 6px; }
+.event-options { display: flex; gap: 12px; justify-content: center; align-items: center; font-size: 0.95rem; color: #ccc; }
+.vs { color: #e94560; font-weight: 700; }
+.event-note { font-size: 0.8rem; color: #888; margin: 6px 0 0; }
+
+.event-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #16213e;
+  border: 2px solid #4ade80;
+  border-radius: 8px;
+  padding: 10px 20px;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  .trophy { font-size: 1.4rem; }
+  .votes { color: #888; font-size: 0.85rem; }
+}
+
+// Chess board
+.board {
+  border: 3px solid #444;
+  display: inline-block;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rank { display: flex; }
+
+.square {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.light { background: #f0d9b5; }
+.dark  { background: #b58863; }
+.selected { outline: 4px solid #f6f669; outline-offset: -4px; background-color: rgba(246,246,105,0.35) !important; }
+
+.valid-move::after {
+  content: '';
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.piece { font-size: 42px; line-height: 1; z-index: 1; }
+
+@keyframes pulse {
+  from { box-shadow: 0 0 8px rgba(233,69,96,0.4); }
+  to   { box-shadow: 0 0 20px rgba(233,69,96,0.8); }
+}
+
+@media (max-width: 520px) {
+  .square { width: 44px; height: 44px; }
+  .piece  { font-size: 28px; }
+}

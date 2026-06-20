@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import gamesRouter from './routes/games';
+import roomsRouter from './routes/rooms';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/games', gamesRouter);
+app.use('/api/rooms', roomsRouter);
 
 // Serve Angular static files in production
 const staticPath = path.resolve(__dirname, '../../frontend/dist/frontend/browser');

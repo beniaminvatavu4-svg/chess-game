@@ -1,0 +1,63 @@
+<div class="audience-page">
+
+  <!-- Game status -->
+  <div class="game-status">{{ gameStatusText }}</div>
+  <div class="room-label">Meci: <strong>{{ roomId }}</strong></div>
+
+  <!-- Voting active -->
+  @if (activeEvent && !hasVoted) {
+    <div class="vote-section">
+      <div class="vote-question">{{ activeEvent.question }}</div>
+      <div class="vote-timer">{{ activeEvent.secondsLeft }}s</div>
+      <div class="vote-buttons">
+        <button class="vote-btn opt-a" (click)="vote(0)">
+          {{ activeEvent.options[0] }}
+        </button>
+        <button class="vote-btn opt-b" (click)="vote(1)">
+          {{ activeEvent.options[1] }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Voted — waiting for result -->
+  @if (activeEvent && hasVoted) {
+    <div class="voted-waiting">
+      <div class="vote-question">{{ activeEvent.question }}</div>
+      <div class="voted-badge">
+        ✅ Ai votat: <strong>{{ activeEvent.options[votedOption!] }}</strong>
+      </div>
+      <div class="vote-timer dim">{{ activeEvent.secondsLeft }}s rămași</div>
+    </div>
+  }
+
+  <!-- Result -->
+  @if (eventResult) {
+    <div class="result-section">
+      <div class="result-emoji">🏆</div>
+      <div class="result-text">
+        Opțiunea câștigătoare:
+      </div>
+      <div class="result-winner">
+        Opțiunea {{ eventResult.winningOption + 1 }}
+      </div>
+      <div class="result-votes">
+        {{ eventResult.votes[0] }} vs {{ eventResult.votes[1] }} voturi
+      </div>
+      @if (votedOption !== null) {
+        <div class="result-personal" [class.win]="votedOption === eventResult.winningOption">
+          {{ votedOption === eventResult.winningOption ? '🎉 Ai votat câștigător!' : '😔 Data viitoare!' }}
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Idle state (no event) -->
+  @if (!activeEvent && !eventResult) {
+    <div class="idle-section">
+      <p>Urmărește meciul live pe ecranul principal.</p>
+      <p class="hint">Un eveniment va apărea în curând — fii pregătit să votezi! 🎲</p>
+    </div>
+  }
+
+</div>

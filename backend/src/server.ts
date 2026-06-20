@@ -3,6 +3,7 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import app from './app';
 import { registerChessHandlers } from './sockets/chess';
+import { registerRoomHandlers } from './sockets/room';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ const io = new Server(httpServer, {
 io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
   registerChessHandlers(io, socket);
+  registerRoomHandlers(io, socket);
 });
 
 httpServer.listen(PORT, () => {
