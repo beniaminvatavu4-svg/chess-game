@@ -11,53 +11,48 @@ export interface EventDefinition {
 export const EVENT_DEFINITIONS: EventDefinition[] = [
   {
     eventId: 'diaspora_pawns',
-    question: '🇷🇴 Vin pionii din diaspora!',
-    options: ['2 pioni fiecare', '4 pioni fiecare'],
+    question: '🇷🇴 Vin pionii din diaspora — fiecare jucător primește pioni cu steag',
+    options: ['Da', 'Nu'],
   },
   {
     eventId: 'activate_queens',
-    question: '💰 Statul decontează regina!',
-    options: ['Regina albă e liberă', 'Regina neagră e liberă'],
+    question: '💰 Statul decontează — ambele regine devin active',
+    options: ['Da', 'Nu'],
   },
   {
     eventId: 'deactivate_queens',
-    question: '🏥 Statul taie de la sănătate!',
-    options: ['Regina albă e blocată', 'Regina neagră e blocată'],
+    question: '🏥 Statul taie de la sănătate — ambele regine sunt blocate',
+    options: ['Da', 'Nu'],
   },
   {
     eventId: 'cutremur',
-    question: '🌍 CUTREMUR! Turnurile se zguduie!',
-    options: ['Magnitudine 4', 'Magnitudine 7'],
+    question: '🌍 Cutremur — toate turnurile primesc o bulină în plus',
+    options: ['Da', 'Nu'],
   },
   {
     eventId: 'rook_back_lost',
-    question: '🏰 Tura 2 înapoi! Cine recuperează?',
-    options: ['Albul recuperează', 'Negrul recuperează'],
-  },
-  {
-    eventId: 'rook_extra',
-    question: '🏰 Turn bonus! Cine primește?',
-    options: ['Albul primește', 'Negrul primește'],
+    question: '🏰 Tura 2 înapoi — cine are sub 2 turnuri primește unul înapoi',
+    options: ['Da', 'Nu'],
   },
   {
     eventId: 'imn_romaniei',
-    question: '🎵 Se cântă imnul! 10 secunde de pauză!',
-    options: ['Deșteaptă-te române!', 'Cântați cu noi!'],
+    question: '🎵 Se cântă imnul — jocul e blocat 30 de secunde',
+    options: ['Da', 'Nu'],
   },
   {
     eventId: 'renovari',
-    question: '🔧 Renovări! Turnurile pierd o bulină!',
-    options: ['Renovăm tot!', 'Hai să renovăm!'],
+    question: '🔧 Renovări — toate turnurile pierd o bulină',
+    options: ['Da', 'Nu'],
   },
   {
     eventId: 'vin_fantomele',
-    question: '👻 Vin fantomele! Regii pot fi mutați!',
-    options: ['Regele alb', 'Regele negru'],
+    question: '👻 Vin fantomele — ambii regi pot fi mutați',
+    options: ['Da', 'Nu'],
   },
   {
     eventId: 'mor_regii',
-    question: '💀 Mor regii! Regii sunt blocați!',
-    options: ['Regele alb', 'Regele negru'],
+    question: '💀 Mor regii — ambii regi sunt blocați din nou',
+    options: ['Da', 'Nu'],
   },
 ];
 
@@ -180,26 +175,6 @@ export function applyEventEffect(
           }
         }
         if (rookCount < 2) {
-          const empty = getEmptySquares(chess).sort(() => Math.random() - 0.5);
-          if (empty.length > 0) {
-            chess.put({ type: 'r', color: rookColor }, empty[0] as Square);
-          }
-        }
-      }
-      fixFen(chess, room);
-      break;
-    }
-
-    case 'rook_extra': {
-      for (const rookColor of ['w', 'b'] as const) {
-        let hasRook = false;
-        outer: for (const f of 'abcdefgh') {
-          for (let r = 1; r <= 8; r++) {
-            const p = chess.get(`${f}${r}` as Square);
-            if (p?.type === 'r' && p.color === rookColor) { hasRook = true; break outer; }
-          }
-        }
-        if (hasRook) {
           const empty = getEmptySquares(chess).sort(() => Math.random() - 0.5);
           if (empty.length > 0) {
             chess.put({ type: 'r', color: rookColor }, empty[0] as Square);
