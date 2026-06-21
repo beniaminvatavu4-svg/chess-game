@@ -30,14 +30,14 @@ interface BoardSquare {
 })
 export class DisplayComponent implements OnInit, OnDestroy {
   private readonly bishopSounds = [
-    'sounds/11900601.mp3',
-    'sounds/censor-beep-1.mp3',
-    'sounds/dry-fart.mp3',
-    'sounds/error_CDOxCYm.mp3',
-    'sounds/oh-my-god-bro-oh-hell-nah-man.mp3',
-    'sounds/pana-aici-diana-sosoaca.mp3',
-    'sounds/protestr.mp3',
-    'sounds/serghei.mp3',
+    '/sounds/11900601.mp3',
+    '/sounds/censor-beep-1.mp3',
+    '/sounds/dry-fart.mp3',
+    '/sounds/error_CDOxCYm.mp3',
+    '/sounds/oh-my-god-bro-oh-hell-nah-man.mp3',
+    '/sounds/pana-aici-diana-sosoaca.mp3',
+    '/sounds/protestr.mp3',
+    '/sounds/serghei.mp3',
   ];
 
   roomId = '';
