@@ -35,6 +35,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
   chess = new Chess();
   board: BoardSquare[][] = [];
   selectedSquare: Square | null = null;
+  bishopKnightMode = false;
 
   boardState: BoardUpdate | null = null;
   statusMessage = 'Conectare…';
@@ -203,10 +204,34 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   highlightMoves(from: Square): void {
+    const piece = this.chess.get(from);
+    this.bishopKnightMode = false;
+
+    // Bishop: 30% chance to show knight moves instead
+    if (piece?.type === 'b' && Math.random() < 0.3) {
+      this.bishopKnightMode = true;
+      const knightOffsets = [[1,2],[1,-2],[-1,2],[-1,-2],[2,1],[2,-1],[-2,1],[-2,-1]];
+      const fromFile = from.charCodeAt(0) - 97;
+      const fromRank = parseInt(from[1]) - 1;
+      const targets = new Set<Square>();
+      for (const [df, dr] of knightOffsets) {
+        const tf = fromFile + df;
+        const tr = fromRank + dr;
+        if (tf >= 0 && tf < 8 && tr >= 0 && tr < 8) {
+          const sq = (String.fromCharCode(97 + tf) + (tr + 1)) as Square;
+          const p = this.chess.get(sq);
+          if (!p || p.color !== piece.color) targets.add(sq);
+        }
+      }
+      this.board = this.board.map(rank => rank.map(sq => ({
+        ...sq, isSelected: sq.square === from, isValidMove: targets.has(sq.square),
+      })));
+      return;
+    }
+
     let moves = this.chess.moves({ square: from, verbose: true });
 
     // Red-dot rook: filter out moves > 4 squares
-    const piece = this.chess.get(from);
     if (piece?.type === 'r') {
       const sr = this.boardState?.specialRooks;
       if (sr) {
@@ -234,6 +259,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   clearHighlights(): void {
+    this.bishopKnightMode = false;
     this.board = this.board.map((rank) =>
       rank.map((sq) => ({ ...sq, isSelected: false, isValidMove: false })),
     );

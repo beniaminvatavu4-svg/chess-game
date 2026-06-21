@@ -198,7 +198,44 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
         }
       }
 
-      const result = chess.move({ from, to, promotion });
+      let result;
+      try {
+        result = chess.move({ from, to, promotion });
+      } catch {
+        // Bishop-as-knight fallback: allow L-shape moves for bishops
+        if (movingPiece?.type === 'b') {
+          const df = Math.abs(to.charCodeAt(0) - from.charCodeAt(0));
+          const dr = Math.abs(parseInt(to[1]) - parseInt(from[1]));
+          if ((df === 1 && dr === 2) || (df === 2 && dr === 1)) {
+            const target = chess.get(to);
+            if (!target || target.color !== movingPiece.color) {
+              // Remove captured special pawn tracking
+              if (target?.type === 'p') {
+                const oppCk = movingPiece.color === 'w' ? 'black' : 'white';
+                room.specialPawns[oppCk].flag = room.specialPawns[oppCk].flag.filter(s => s !== to);
+                room.specialPawns[oppCk].hair = room.specialPawns[oppCk].hair.filter(s => s !== to);
+              }
+              chess.remove(from);
+              if (target) chess.remove(to);
+              chess.put({ type: 'b', color: movingPiece.color }, to);
+              const fenParts = chess.fen().split(' ');
+              fenParts[1] = movingPiece.color === 'w' ? 'b' : 'w';
+              fenParts[3] = '-';
+              fenParts[4] = target ? '0' : String(parseInt(fenParts[4]) + 1);
+              if (movingPiece.color === 'b') fenParts[5] = String(parseInt(fenParts[5]) + 1);
+              room.chess.fen = fenParts.join(' ');
+              room.chess.currentTurn = movingPiece.color === 'w' ? 'b' : 'w';
+              room.chess.lastMove = move;
+              room.chess.moveCount++;
+              if (room.chess.moveCount % MOVES_PER_EVENT === 0) startEvent(io, room);
+              io.to(SOCKET_ROOM(roomId)).emit('room:boardUpdate', getBoardUpdate(room));
+              return;
+            }
+          }
+        }
+        socket.emit('room:error', { message: `Invalid move: ${move}` });
+        return;
+      }
 
       // Track special pawn overlays through moves
       if (movingPiece && movingPiece.type === 'p') {
