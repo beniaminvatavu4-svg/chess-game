@@ -129,15 +129,21 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
   onSquareClick(sq: BoardSquare): void {
     const ownColor = this.color === 'white' ? 'w' : 'b';
+    const myTurn = this.boardState?.status === 'active' && this.chess.turn() === ownColor;
+
+    // Flag pawn: clicking it immediately teleports to a random square
+    if (sq.piece?.[0] === ownColor && sq.specialPawn === 'flag' && myTurn) {
+      this.roomService.teleportFlagPawn(this.roomId, this.token, sq.square);
+      this.selectedSquare = null;
+      this.clearHighlights();
+      return;
+    }
 
     if (this.selectedSquare) {
       if (sq.piece && sq.piece[0] === ownColor) {
         this.selectedSquare = sq.square;
         this.highlightMoves(sq.square);
-      } else if (
-        this.boardState?.status === 'active' &&
-        this.chess.turn() === ownColor
-      ) {
+      } else if (myTurn) {
         this.roomService.makeMove(
           this.roomId,
           this.token,

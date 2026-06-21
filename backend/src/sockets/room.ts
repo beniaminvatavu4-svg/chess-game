@@ -6,6 +6,7 @@ import {
   JoinRoomPayload,
   MakeMovePayload,
   VotePayload,
+  TeleportFlagPawnPayload,
   RoomStatePayload,
   EventStartPayload,
   EventResultPayload,
@@ -206,6 +207,66 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
     } catch {
       socket.emit('room:error', { message: `Invalid move: ${move}` });
     }
+  });
+
+  socket.on('room:teleport-flag-pawn', ({ roomId, token, from }: TeleportFlagPawnPayload) => {
+    const room = rooms.get(roomId);
+    if (!room || room.chess.status !== 'active') return;
+
+    const expectedColor: 'white' | 'black' = room.chess.currentTurn === 'w' ? 'white' : 'black';
+    if (room.tokens[expectedColor] !== token) {
+      socket.emit('room:error', { message: 'Not your turn or invalid token' });
+      return;
+    }
+
+    const color = room.chess.currentTurn as 'w' | 'b';
+    const ck = color === 'w' ? 'white' : 'black';
+
+    if (!room.specialPawns[ck].flag.includes(from)) {
+      socket.emit('room:error', { message: 'Not a flag pawn' });
+      return;
+    }
+
+    const chess = new Chess(room.chess.fen);
+
+    // Collect empty squares, exclude ranks 1 & 8 (pawns can't exist there)
+    const emptySquares: string[] = [];
+    for (const file of 'abcdefgh') {
+      for (let rank = 2; rank <= 7; rank++) {
+        const sq = `${file}${rank}`;
+        if (sq !== from && !chess.get(sq as Square)) {
+          emptySquares.push(sq);
+        }
+      }
+    }
+    if (emptySquares.length === 0) return;
+
+    const to = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+
+    chess.remove(from as Square);
+    chess.put({ type: 'p', color }, to as Square);
+
+    // Flip turn via FEN (chess.js doesn't flip turn on manual put/remove)
+    const fenParts = chess.fen().split(' ');
+    fenParts[1] = color === 'w' ? 'b' : 'w';
+    fenParts[3] = '-';
+    fenParts[4] = '0';
+    if (color === 'b') fenParts[5] = String(parseInt(fenParts[5]) + 1);
+    room.chess.fen = fenParts.join(' ');
+
+    room.chess.currentTurn = color === 'w' ? 'b' : 'w';
+    room.chess.lastMove = `${from}${to}`;
+    room.chess.moveCount++;
+
+    const sp = room.specialPawns[ck];
+    const fi = sp.flag.indexOf(from);
+    if (fi !== -1) sp.flag[fi] = to;
+
+    if (room.chess.moveCount % MOVES_PER_EVENT === 0) {
+      startEvent(io, room);
+    }
+
+    io.to(SOCKET_ROOM(roomId)).emit('room:boardUpdate', getBoardUpdate(room));
   });
 
   socket.on('room:vote', ({ roomId, deviceId, option }: VotePayload) => {

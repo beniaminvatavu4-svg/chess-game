@@ -138,13 +138,12 @@
 
 .hair-img {
   position: absolute;
-  top: -16px;
+  top: -9%;
   left: 50%;
   transform: translateX(-50%);
-  width: 56px;
-  height: 56px;
+  width: 97%;
+  height: 97%;
   object-fit: contain;
-  mix-blend-mode: screen;
   z-index: 4;
   pointer-events: none;
 }

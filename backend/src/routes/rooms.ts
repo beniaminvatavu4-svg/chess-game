@@ -20,16 +20,15 @@ function generateSpecialPawns(chess: Chess): Room['specialPawns'] {
   function assignColor(squares: string[]) {
     const shuffled = [...squares].sort(() => Math.random() - 0.5);
 
-    // 1-3 missing
-    const missingCount = 1 + Math.floor(Math.random() * 3);
-    const missing = shuffled.slice(0, missingCount);
-    const rest = shuffled.slice(missingCount); // 5-7 remaining
+    // Strict 1-3 per category, no normal pawns, sum = 8
+    // Only valid split: two categories get 3, one gets 2 — randomly which gets 2
+    const counts: [number, number, number] = [3, 3, 2];
+    counts.sort(() => Math.random() - 0.5);
+    const [missingCount, flagCount, hairCount] = counts;
 
-    // All remaining go to flag or hair (no normal pawns)
-    // Split so both types have at least 1
-    const flagCount = 1 + Math.floor(Math.random() * (rest.length - 1));
-    const flag = rest.slice(0, flagCount);
-    const hair = rest.slice(flagCount);
+    const missing = shuffled.slice(0, missingCount);
+    const flag   = shuffled.slice(missingCount, missingCount + flagCount);
+    const hair   = shuffled.slice(missingCount + flagCount, missingCount + flagCount + hairCount);
 
     return { flag, hair, missing };
   }

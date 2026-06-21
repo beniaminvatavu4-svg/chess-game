@@ -26,6 +26,12 @@ export interface VotePayload {
   option: 0 | 1;
 }
 
+export interface TeleportFlagPawnPayload {
+  roomId: string;
+  token: string;
+  from: string;
+}
+
 // ─── Server → Client ─────────────────────────────────────────────────────────
 
 export interface SpecialPawns {

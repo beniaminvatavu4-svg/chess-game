@@ -48,6 +48,10 @@ export class RoomService implements OnDestroy {
     this.socket.emit('room:move', { roomId, token, move });
   }
 
+  teleportFlagPawn(roomId: string, token: string, from: string): void {
+    this.socket.emit('room:teleport-flag-pawn', { roomId, token, from });
+  }
+
   vote(roomId: string, deviceId: string, option: 0 | 1): void {
     this.socket.emit('room:vote', { roomId, deviceId, option });
   }
