@@ -136,13 +136,15 @@
   border-radius: 1px;
 }
 
-.hair-svg {
+.hair-img {
   position: absolute;
-  top: 0px;
+  top: -16px;
   left: 50%;
   transform: translateX(-50%);
-  width: 18px;
-  height: 14px;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  mix-blend-mode: screen;
   z-index: 4;
   pointer-events: none;
 }
