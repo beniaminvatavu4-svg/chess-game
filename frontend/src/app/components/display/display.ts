@@ -48,6 +48,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
   boardState: BoardUpdate | null = null;
   statusMessage = 'Conectare…';
   audioEnabled = false;
+  private unlockHandler = () => this.enableAudio();
 
   qrAudience = '';
 
@@ -65,6 +66,10 @@ export class DisplayComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    document.addEventListener('click', this.unlockHandler, { once: true });
+    document.addEventListener('keydown', this.unlockHandler, { once: true });
+    document.addEventListener('touchstart', this.unlockHandler, { once: true });
+
     const paramRoomId = this.route.snapshot.paramMap.get('roomId') ?? '';
     if (paramRoomId) {
       this.roomId = paramRoomId;
@@ -255,6 +260,9 @@ export class DisplayComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    document.removeEventListener('click', this.unlockHandler);
+    document.removeEventListener('keydown', this.unlockHandler);
+    document.removeEventListener('touchstart', this.unlockHandler);
     if (this.pollTimer) clearInterval(this.pollTimer);
     this.sub.unsubscribe();
   }
