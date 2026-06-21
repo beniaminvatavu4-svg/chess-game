@@ -161,7 +161,30 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
       const from = move.slice(0, 2) as Square;
       const to = move.slice(2, 4) as Square;
       const promotion = move.length >= 5 ? move[4] : 'q';
-      chess.move({ from, to, promotion });
+
+      const movingPiece = chess.get(from);
+      const result = chess.move({ from, to, promotion });
+
+      // Track special pawn overlays through moves
+      if (movingPiece && movingPiece.type === 'p') {
+        const ck = movingPiece.color === 'w' ? 'white' : 'black';
+        const sp = room.specialPawns[ck];
+        const fi = sp.flag.indexOf(from); if (fi !== -1) sp.flag[fi] = to;
+        const hi = sp.hair.indexOf(from); if (hi !== -1) sp.hair[hi] = to;
+        // Promoted pawn loses its special
+        if (result.flags.includes('p')) {
+          sp.flag = sp.flag.filter(s => s !== to);
+          sp.hair = sp.hair.filter(s => s !== to);
+        }
+      }
+      // Remove special from captured pawn
+      if (result.captured === 'p') {
+        const oppCk = movingPiece && movingPiece.color === 'w' ? 'black' : 'white';
+        const oppSp = room.specialPawns[oppCk];
+        const capSq = result.flags.includes('e') ? (to[0] + from[1]) as Square : to;
+        oppSp.flag = oppSp.flag.filter(s => s !== capSq);
+        oppSp.hair = oppSp.hair.filter(s => s !== capSq);
+      }
 
       room.chess.fen = chess.fen();
       room.chess.currentTurn = chess.turn() as 'w' | 'b';

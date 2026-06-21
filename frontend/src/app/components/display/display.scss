@@ -143,15 +143,28 @@
 .piece-b { color: #1a1a1a; }
 
 // Special pawn overlays
-.special {
+.flag-svg {
   position: absolute;
-  font-size: 16px;
-  line-height: 1;
+  bottom: 3px;
+  right: 3px;
+  width: 26px;
+  height: 18px;
+  z-index: 4;
+  pointer-events: none;
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 1px;
+}
+
+.hair-svg {
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 17px;
   z-index: 4;
   pointer-events: none;
 }
-.flag-overlay { bottom: 2px; right: 3px; }
-.hair-overlay { top: 2px; left: 50%; transform: translateX(-50%); }
 
 // Coordinate labels
 .coord {

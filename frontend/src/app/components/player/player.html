@@ -48,8 +48,20 @@
             <span class="piece"
               [class.piece-w]="sq.piece?.[0] === 'w'"
               [class.piece-b]="sq.piece?.[0] === 'b'">{{ pieceSymbol(sq.piece) }}</span>
-            @if (sq.specialPawn === 'flag') { <span class="special flag-overlay">🇷🇴</span> }
-            @if (sq.specialPawn === 'hair') { <span class="special hair-overlay">🟣</span> }
+            @if (sq.specialPawn === 'flag') {
+              <svg class="flag-svg" viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" width="1" height="2" fill="#002B7F"/>
+                <rect x="1" width="1" height="2" fill="#FCD116"/>
+                <rect x="2" width="1" height="2" fill="#CE1126"/>
+              </svg>
+            }
+            @if (sq.specialPawn === 'hair') {
+              <svg class="hair-svg" viewBox="0 0 30 22" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4,22 C3,16 5,9 6,2 C8,9 8,16 7,22" fill="#9B59B6"/>
+                <path d="M13,22 C12,15 13,8 15,0 C17,8 18,15 17,22" fill="#7D3C98"/>
+                <path d="M22,22 C21,16 22,9 24,2 C26,9 26,16 25,22" fill="#9B59B6"/>
+              </svg>
+            }
           </div>
         }
       </div>

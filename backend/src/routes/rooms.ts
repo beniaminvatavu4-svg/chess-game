@@ -16,29 +16,26 @@ function generateRoomId(): string {
   return id;
 }
 
-function rand13(max: number): number {
-  return 1 + Math.floor(Math.random() * Math.min(3, max));
-}
-
 function generateSpecialPawns(chess: Chess): Room['specialPawns'] {
-  const wSquares = ['a2','b2','c2','d2','e2','f2','g2','h2'];
-  const bSquares = ['a7','b7','c7','d7','e7','f7','g7','h7'];
-
   function assignColor(squares: string[]) {
     const shuffled = [...squares].sort(() => Math.random() - 0.5);
-    const missingCount = rand13(shuffled.length);
+
+    // 1-3 missing
+    const missingCount = 1 + Math.floor(Math.random() * 3);
     const missing = shuffled.slice(0, missingCount);
-    const rest = shuffled.slice(missingCount);
-    const flagCount = rand13(rest.length);
+    const rest = shuffled.slice(missingCount); // 5-7 remaining
+
+    // All remaining go to flag or hair (no normal pawns)
+    // Split so both types have at least 1
+    const flagCount = 1 + Math.floor(Math.random() * (rest.length - 1));
     const flag = rest.slice(0, flagCount);
-    const afterFlag = rest.slice(flagCount);
-    const hairCount = rand13(afterFlag.length);
-    const hair = afterFlag.slice(0, hairCount);
+    const hair = rest.slice(flagCount);
+
     return { flag, hair, missing };
   }
 
-  const white = assignColor(wSquares);
-  const black = assignColor(bSquares);
+  const white = assignColor(['a2','b2','c2','d2','e2','f2','g2','h2']);
+  const black = assignColor(['a7','b7','c7','d7','e7','f7','g7','h7']);
 
   for (const sq of white.missing) chess.remove(sq as Square);
   for (const sq of black.missing) chess.remove(sq as Square);
