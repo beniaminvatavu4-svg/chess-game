@@ -6,6 +6,8 @@ import { Subscription } from 'rxjs';
 import { RoomService } from '../../services/room.service';
 import { BoardUpdate, EventResult, EventStart } from '../../models/room.model';
 
+const LATEST_POLL_MS = 5000;
+
 interface BoardSquare {
   square: Square;
   piece: string | null;
@@ -27,6 +29,17 @@ interface BoardSquare {
   styleUrl: './display.scss',
 })
 export class DisplayComponent implements OnInit, OnDestroy {
+  private readonly bishopSounds = [
+    'sounds/11900601.mp3',
+    'sounds/censor-beep-1.mp3',
+    'sounds/dry-fart.mp3',
+    'sounds/error_CDOxCYm.mp3',
+    'sounds/oh-my-god-bro-oh-hell-nah-man.mp3',
+    'sounds/pana-aici-diana-sosoaca.mp3',
+    'sounds/protestr.mp3',
+    'sounds/serghei.mp3',
+  ];
+
   roomId = '';
   chess = new Chess();
   board: BoardSquare[][] = [];
@@ -40,6 +53,8 @@ export class DisplayComponent implements OnInit, OnDestroy {
   eventResult: EventResult | null = null;
 
   private sub = new Subscription();
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private autoMode = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -47,8 +62,15 @@ export class DisplayComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.roomId = this.route.snapshot.paramMap.get('roomId') ?? '';
-    this.roomService.joinAsSpectator(this.roomId);
+    const paramRoomId = this.route.snapshot.paramMap.get('roomId') ?? '';
+    if (paramRoomId) {
+      this.roomId = paramRoomId;
+      this.roomService.joinAsSpectator(this.roomId);
+    } else {
+      this.autoMode = true;
+      this.connectToLatest();
+      this.pollTimer = setInterval(() => this.connectToLatest(), LATEST_POLL_MS);
+    }
 
     this.sub.add(
       this.roomService.onRoomState().subscribe((state) => {
@@ -89,10 +111,25 @@ export class DisplayComponent implements OnInit, OnDestroy {
   }
 
   private applyBoardUpdate(update: BoardUpdate): void {
+    if (update.lastMove && this.boardState) {
+      const prevChess = new Chess(this.boardState.fen);
+      const from = update.lastMove.slice(0, 2) as Square;
+      const piece = prevChess.get(from);
+      if (piece?.type === 'b') {
+        this.playBishopSound();
+      }
+    }
     this.boardState = update;
     this.chess.load(update.fen);
     this.renderBoard(update.lastMove);
     this.updateStatus();
+  }
+
+  private playBishopSound(): void {
+    const src = this.bishopSounds[Math.floor(Math.random() * this.bishopSounds.length)];
+    const audio = new Audio(src);
+    audio.play().catch(() => {});
+    setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 2000);
   }
 
   renderBoard(lastMove: string | null): void {
@@ -174,7 +211,27 @@ export class DisplayComponent implements OnInit, OnDestroy {
     return map[code] ?? '';
   }
 
+  private connectToLatest(): void {
+    this.roomService.getLatestRoom().subscribe({
+      next: ({ roomId }) => {
+        if (roomId === this.roomId) return;
+        if (this.roomId) this.roomService.leaveRoom(this.roomId);
+        this.roomId = roomId;
+        this.boardState = null;
+        this.board = [];
+        this.activeEvent = null;
+        this.eventResult = null;
+        this.statusMessage = 'Conectare…';
+        this.roomService.joinAsSpectator(roomId);
+      },
+      error: () => {
+        if (!this.roomId) this.statusMessage = 'Niciun meci activ…';
+      },
+    });
+  }
+
   ngOnDestroy(): void {
+    if (this.pollTimer) clearInterval(this.pollTimer);
     this.sub.unsubscribe();
   }
 }

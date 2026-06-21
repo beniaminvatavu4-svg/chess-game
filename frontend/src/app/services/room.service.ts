@@ -40,6 +40,14 @@ export class RoomService implements OnDestroy {
     this.socket.emit('room:join', { roomId, role: 'spectator' });
   }
 
+  leaveRoom(roomId: string): void {
+    this.socket.emit('room:leave', { roomId });
+  }
+
+  getLatestRoom(): Observable<{ roomId: string }> {
+    return this.http.get<{ roomId: string }>(`${this.base}/rooms/latest`);
+  }
+
   joinAsAudience(roomId: string): void {
     this.socket.emit('room:join', { roomId, role: 'audience' });
   }

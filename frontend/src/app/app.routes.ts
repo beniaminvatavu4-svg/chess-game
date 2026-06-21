@@ -14,6 +14,7 @@ export const routes: Routes = [
   // ─── Live event room routes ───────────────────────────────────────────────
   { path: 'host', component: HostComponent },
   { path: 'play/:roomId', component: PlayerComponent },
+  { path: 'spectate', component: DisplayComponent },
   { path: 'spectate/:roomId', component: DisplayComponent },
   { path: 'audience/:roomId', component: AudienceComponent },
 

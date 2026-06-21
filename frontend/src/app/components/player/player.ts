@@ -28,17 +28,6 @@ interface BoardSquare {
   styleUrl: './player.scss',
 })
 export class PlayerComponent implements OnInit, OnDestroy {
-  private readonly bishopSounds = [
-    'sounds/11900601.mp3',
-    'sounds/censor-beep-1.mp3',
-    'sounds/dry-fart.mp3',
-    'sounds/error_CDOxCYm.mp3',
-    'sounds/oh-my-god-bro-oh-hell-nah-man.mp3',
-    'sounds/pana-aici-diana-sosoaca.mp3',
-    'sounds/protestr.mp3',
-    'sounds/serghei.mp3',
-  ];
-
   roomId = '';
   token = '';
   color: PlayerColor = 'white';
@@ -111,25 +100,10 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   private applyBoardUpdate(update: BoardUpdate): void {
-    if (update.lastMove && this.boardState) {
-      const prevChess = new Chess(this.boardState.fen);
-      const from = update.lastMove.slice(0, 2) as Square;
-      const piece = prevChess.get(from);
-      if (piece?.type === 'b') {
-        this.playBishopSound();
-      }
-    }
     this.boardState = update;
     this.chess.load(update.fen);
     this.renderBoard();
     this.updateStatus();
-  }
-
-  private playBishopSound(): void {
-    const src = this.bishopSounds[Math.floor(Math.random() * this.bishopSounds.length)];
-    const audio = new Audio(src);
-    audio.play().catch(() => {});
-    setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 2000);
   }
 
   renderBoard(): void {

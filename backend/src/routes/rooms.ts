@@ -106,6 +106,15 @@ router.post('/', async (req: Request, res: Response) => {
   res.status(201).json(response);
 });
 
+router.get('/latest', (_req: Request, res: Response) => {
+  let latest: Room | null = null;
+  for (const room of rooms.values()) {
+    if (!latest || room.createdAt > latest.createdAt) latest = room;
+  }
+  if (!latest) { res.status(404).json({ error: 'No rooms' }); return; }
+  res.json({ roomId: latest.roomId });
+});
+
 router.get('/:id', (req: Request, res: Response) => {
   const room = rooms.get(req.params['id'] as string);
   if (!room) {

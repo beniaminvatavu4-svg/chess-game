@@ -341,6 +341,12 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
     event.votes[option]++;
   });
 
+  socket.on('room:leave', ({ roomId }: { roomId: string }) => {
+    socket.leave(SOCKET_ROOM(roomId));
+    const room = rooms.get(roomId);
+    if (room) room.sockets.spectators.delete(socket.id);
+  });
+
   socket.on('disconnecting', () => {
     for (const socketRoom of socket.rooms) {
       if (!socketRoom.startsWith('room:')) continue;
