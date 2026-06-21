@@ -193,7 +193,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
   pieceSymbol(code: string | null): string {
     if (!code) return '';
     const map: Record<string, string> = {
-      wp: '♙', wr: '♖', wn: '♘', wb: '♗', wq: '♕', wk: '♔',
+      wp: '♟', wr: '♜', wn: '♞', wb: '♝', wq: '♛', wk: '♚',
       bp: '♟', br: '♜', bn: '♞', bb: '♝', bq: '♛', bk: '♚',
     };
     return map[code] ?? '';
