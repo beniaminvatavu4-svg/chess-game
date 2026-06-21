@@ -167,6 +167,28 @@
   pointer-events: none;
 }
 
+.inactive-queen {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: 17px;
+  font-weight: 900;
+  color: #e02020;
+  z-index: 4;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.dead-king {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: 18px;
+  z-index: 4;
+  pointer-events: none;
+  line-height: 1;
+}
+
 .red-dot {
   position: absolute;
   bottom: 5px;

@@ -15,6 +15,8 @@ interface BoardSquare {
   fileLabel: string | null;
   specialPawn: 'flag' | 'hair' | null;
   hasRedDot: boolean;
+  isInactiveKing: boolean;
+  isInactiveQueen: boolean;
 }
 
 @Component({
@@ -112,6 +114,8 @@ export class DisplayComponent implements OnInit, OnDestroy {
           fileLabel: ri === 7 ? square[0] : null,
           specialPawn: this.getSpecialPawn(square, pieceCode),
           hasRedDot: this.getHasRedDot(square, pieceCode),
+          isInactiveKing: this.getIsInactiveKing(pieceCode),
+          isInactiveQueen: this.getIsInactiveQueen(pieceCode),
         };
       }),
     );
@@ -133,6 +137,20 @@ export class DisplayComponent implements OnInit, OnDestroy {
     if (!sr) return false;
     const list = pieceCode[0] === 'w' ? sr.white : sr.black;
     return list.includes(square);
+  }
+
+  private getIsInactiveKing(pieceCode: string | null): boolean {
+    if (!pieceCode || pieceCode[1] !== 'k') return false;
+    const ik = this.boardState?.inactiveKings;
+    if (!ik) return false;
+    return pieceCode[0] === 'w' ? ik.white : ik.black;
+  }
+
+  private getIsInactiveQueen(pieceCode: string | null): boolean {
+    if (!pieceCode || pieceCode[1] !== 'q') return false;
+    const iq = this.boardState?.inactiveQueens;
+    if (!iq) return false;
+    return pieceCode[0] === 'w' ? iq.white : iq.black;
   }
 
   updateStatus(): void {

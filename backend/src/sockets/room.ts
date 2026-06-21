@@ -165,6 +165,24 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
 
       const movingPiece = chess.get(from);
 
+      // Inactive king: block all king moves
+      if (movingPiece?.type === 'k') {
+        const ck = movingPiece.color === 'w' ? 'white' : 'black';
+        if (room.inactiveKings[ck]) {
+          socket.emit('room:error', { message: 'Regele este inactiv' });
+          return;
+        }
+      }
+
+      // Inactive queen: block all queen moves
+      if (movingPiece?.type === 'q') {
+        const ck = movingPiece.color === 'w' ? 'white' : 'black';
+        if (room.inactiveQueens[ck]) {
+          socket.emit('room:error', { message: 'Regina este inactivă' });
+          return;
+        }
+      }
+
       // Red-dot rook: block moves exceeding 4 squares
       if (movingPiece?.type === 'r') {
         const ck = movingPiece.color === 'w' ? 'white' : 'black';

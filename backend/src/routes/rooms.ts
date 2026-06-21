@@ -87,6 +87,8 @@ router.post('/', async (req: Request, res: Response) => {
     activeEvent: null,
     specialPawns,
     specialRooks,
+    inactiveKings: { white: true, black: true },
+    inactiveQueens: { white: true, black: true },
     qr: { joinBlack: qrJoinBlack, audience: qrAudience },
     createdAt: new Date(),
   };

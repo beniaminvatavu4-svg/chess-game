@@ -17,6 +17,16 @@ export interface SpecialRooks {
   black: string[];
 }
 
+export interface InactiveKings {
+  white: boolean;
+  black: boolean;
+}
+
+export interface InactiveQueens {
+  white: boolean;
+  black: boolean;
+}
+
 export interface BoardUpdate {
   fen: string;
   status: GameStatus;
@@ -26,6 +36,8 @@ export interface BoardUpdate {
   players: { white: boolean; black: boolean };
   specialPawns: SpecialPawns;
   specialRooks: SpecialRooks;
+  inactiveKings: InactiveKings;
+  inactiveQueens: InactiveQueens;
 }
 
 export interface RoomState {

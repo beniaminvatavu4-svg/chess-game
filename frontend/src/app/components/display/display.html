@@ -55,6 +55,12 @@
               @if (sq.hasRedDot) {
                 <span class="red-dot"></span>
               }
+              @if (sq.isInactiveKing) {
+                <span class="dead-king">💀</span>
+              }
+              @if (sq.isInactiveQueen) {
+                <span class="inactive-queen">✚</span>
+              }
             </div>
           }
         </div>

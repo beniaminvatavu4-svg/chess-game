@@ -16,6 +16,8 @@ interface BoardSquare {
   fileLabel: string | null;
   specialPawn: 'flag' | 'hair' | null;
   hasRedDot: boolean;
+  isInactiveKing: boolean;
+  isInactiveQueen: boolean;
 }
 
 @Component({
@@ -26,6 +28,17 @@ interface BoardSquare {
   styleUrl: './player.scss',
 })
 export class PlayerComponent implements OnInit, OnDestroy {
+  private readonly bishopSounds = [
+    'sounds/11900601.mp3',
+    'sounds/censor-beep-1.mp3',
+    'sounds/dry-fart.mp3',
+    'sounds/error_CDOxCYm.mp3',
+    'sounds/oh-my-god-bro-oh-hell-nah-man.mp3',
+    'sounds/pana-aici-diana-sosoaca.mp3',
+    'sounds/protestr.mp3',
+    'sounds/serghei.mp3',
+  ];
+
   roomId = '';
   token = '';
   color: PlayerColor = 'white';
@@ -98,10 +111,25 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   private applyBoardUpdate(update: BoardUpdate): void {
+    if (update.lastMove && this.boardState) {
+      const prevChess = new Chess(this.boardState.fen);
+      const from = update.lastMove.slice(0, 2) as Square;
+      const piece = prevChess.get(from);
+      if (piece?.type === 'b') {
+        this.playBishopSound();
+      }
+    }
     this.boardState = update;
     this.chess.load(update.fen);
     this.renderBoard();
     this.updateStatus();
+  }
+
+  private playBishopSound(): void {
+    const src = this.bishopSounds[Math.floor(Math.random() * this.bishopSounds.length)];
+    const audio = new Audio(src);
+    audio.play().catch(() => {});
+    setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 2000);
   }
 
   renderBoard(): void {
@@ -124,6 +152,8 @@ export class PlayerComponent implements OnInit, OnDestroy {
           fileLabel: ri === ranks.length - 1 ? square[0] : null,
           specialPawn: this.getSpecialPawn(square, pieceCode),
           hasRedDot: this.getHasRedDot(square, pieceCode),
+          isInactiveKing: this.getIsInactiveKing(pieceCode),
+          isInactiveQueen: this.getIsInactiveQueen(pieceCode),
         };
       });
     });
@@ -132,6 +162,9 @@ export class PlayerComponent implements OnInit, OnDestroy {
   onSquareClick(sq: BoardSquare): void {
     const ownColor = this.color === 'white' ? 'w' : 'b';
     const myTurn = this.boardState?.status === 'active' && this.chess.turn() === ownColor;
+
+    // Inactive king/queen: block selection entirely
+    if ((sq.isInactiveKing || sq.isInactiveQueen) && sq.piece?.[0] === ownColor) return;
 
     // Flag pawn: clicking it immediately teleports to a random square
     if (sq.piece?.[0] === ownColor && sq.specialPawn === 'flag' && myTurn) {
@@ -179,6 +212,20 @@ export class PlayerComponent implements OnInit, OnDestroy {
     if (!sr) return false;
     const list = pieceCode[0] === 'w' ? sr.white : sr.black;
     return list.includes(square);
+  }
+
+  private getIsInactiveKing(pieceCode: string | null): boolean {
+    if (!pieceCode || pieceCode[1] !== 'k') return false;
+    const ik = this.boardState?.inactiveKings;
+    if (!ik) return false;
+    return pieceCode[0] === 'w' ? ik.white : ik.black;
+  }
+
+  private getIsInactiveQueen(pieceCode: string | null): boolean {
+    if (!pieceCode || pieceCode[1] !== 'q') return false;
+    const iq = this.boardState?.inactiveQueens;
+    if (!iq) return false;
+    return pieceCode[0] === 'w' ? iq.white : iq.black;
   }
 
   highlightMoves(from: Square): void {
