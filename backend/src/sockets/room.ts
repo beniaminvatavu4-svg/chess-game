@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { Chess, Square } from 'chess.js';
 import { rooms, Room, getBoardUpdate, ActiveEvent } from '../models/room';
-import { pickRandomEvent, applyEventEffect } from '../events';
+import { pickTwoRandomEvents, applyEventEffect } from '../events';
 import {
   JoinRoomPayload,
   MakeMovePayload,
@@ -12,8 +12,8 @@ import {
   EventResultPayload,
 } from '../types';
 
-const MOVES_PER_EVENT = 6; // event triggers every N total moves
-const EVENT_DURATION_S = parseInt(process.env.EVENT_DURATION_S ?? '30', 10);
+const MOVES_PER_EVENT = 6;
+const EVENT_DURATION_S = parseInt(process.env.EVENT_DURATION_S ?? '10', 10);
 
 const SOCKET_ROOM = (roomId: string) => `room:${roomId}`;
 
@@ -23,9 +23,12 @@ function startEvent(io: Server, room: Room): void {
   if (room.chess.status !== 'active') return;
   if (room.activeEvent) return; // already running
 
-  const def = pickRandomEvent();
+  const [def0, def1] = pickTwoRandomEvents(room);
   const event: ActiveEvent = {
-    ...def,
+    eventId: `${def0.eventId}|${def1.eventId}`,
+    candidateEventIds: [def0.eventId, def1.eventId],
+    question: '🗳️ Ce se întâmplă?',
+    options: [def0.question, def1.question],
     duration: EVENT_DURATION_S,
     secondsLeft: EVENT_DURATION_S,
     votes: [0, 0],
@@ -75,7 +78,8 @@ function finalizeEvent(io: Server, room: Room): void {
   };
   io.to(SOCKET_ROOM(room.roomId)).emit('room:event:result', result);
 
-  applyEventEffect(room, event.eventId, winningOption);
+  const chosenEventId = event.candidateEventIds[winningOption];
+  applyEventEffect(room, chosenEventId, winningOption, io, SOCKET_ROOM(room.roomId));
 
   io.to(SOCKET_ROOM(room.roomId)).emit('room:boardUpdate', getBoardUpdate(room));
 
@@ -149,6 +153,15 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
     const room = rooms.get(roomId);
     if (!room || room.chess.status !== 'active') return;
 
+    if (room.activeEvent) {
+      socket.emit('room:error', { message: 'Nu poți muta în timpul votului!' });
+      return;
+    }
+    if (room.imnActive) {
+      socket.emit('room:error', { message: 'Se cântă imnul — nu poți muta!' });
+      return;
+    }
+
     const expectedColor: 'white' | 'black' =
       room.chess.currentTurn === 'w' ? 'white' : 'black';
 
@@ -183,18 +196,19 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
         }
       }
 
-      // Red-dot rook: block moves exceeding 4 squares
+      // Rook movement limits
       if (movingPiece?.type === 'r') {
         const ck = movingPiece.color === 'w' ? 'white' : 'black';
-        if (room.specialRooks[ck].includes(from)) {
-          const dist = Math.max(
-            Math.abs(to.charCodeAt(0) - from.charCodeAt(0)),
-            Math.abs(parseInt(to[1]) - parseInt(from[1])),
-          );
-          if (dist > 4) {
-            socket.emit('room:error', { message: 'Red-dot rook can only move 4 squares' });
-            return;
-          }
+        const dist = Math.max(
+          Math.abs(to.charCodeAt(0) - from.charCodeAt(0)),
+          Math.abs(parseInt(to[1]) - parseInt(from[1])),
+        );
+        if (room.doubleRedDotRooks[ck].includes(from) && dist > 1) {
+          socket.emit('room:error', { message: 'Turnul cu 2 buline se mișcă doar 1 spațiu' });
+          return;
+        } else if (room.specialRooks[ck].includes(from) && dist > 4) {
+          socket.emit('room:error', { message: 'Turnul cu bulină se mișcă max 4 spații' });
+          return;
         }
       }
 
@@ -249,31 +263,33 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
           sp.hair = sp.hair.filter(s => s !== to);
         }
       }
-      // Track red-dot rook movements
+      // Track rook movements (single + double dot)
       if (movingPiece?.type === 'r') {
         const ck = movingPiece.color === 'w' ? 'white' : 'black';
         const ri = room.specialRooks[ck].indexOf(from);
         if (ri !== -1) room.specialRooks[ck][ri] = to;
+        const dri = room.doubleRedDotRooks[ck].indexOf(from);
+        if (dri !== -1) room.doubleRedDotRooks[ck][dri] = to;
       }
       // Track rook movement during castling
       if (result.flags.includes('k')) {
         const ck = movingPiece?.color === 'w' ? 'white' : 'black';
-        const rookFrom = movingPiece?.color === 'w' ? 'h1' : 'h8';
-        const rookTo   = movingPiece?.color === 'w' ? 'f1' : 'f8';
-        const ri = room.specialRooks[ck].indexOf(rookFrom);
-        if (ri !== -1) room.specialRooks[ck][ri] = rookTo;
+        const rF = movingPiece?.color === 'w' ? 'h1' : 'h8';
+        const rT = movingPiece?.color === 'w' ? 'f1' : 'f8';
+        const ri = room.specialRooks[ck].indexOf(rF); if (ri !== -1) room.specialRooks[ck][ri] = rT;
+        const dri = room.doubleRedDotRooks[ck].indexOf(rF); if (dri !== -1) room.doubleRedDotRooks[ck][dri] = rT;
       } else if (result.flags.includes('q')) {
         const ck = movingPiece?.color === 'w' ? 'white' : 'black';
-        const rookFrom = movingPiece?.color === 'w' ? 'a1' : 'a8';
-        const rookTo   = movingPiece?.color === 'w' ? 'd1' : 'd8';
-        const ri = room.specialRooks[ck].indexOf(rookFrom);
-        if (ri !== -1) room.specialRooks[ck][ri] = rookTo;
+        const rF = movingPiece?.color === 'w' ? 'a1' : 'a8';
+        const rT = movingPiece?.color === 'w' ? 'd1' : 'd8';
+        const ri = room.specialRooks[ck].indexOf(rF); if (ri !== -1) room.specialRooks[ck][ri] = rT;
+        const dri = room.doubleRedDotRooks[ck].indexOf(rF); if (dri !== -1) room.doubleRedDotRooks[ck][dri] = rT;
       }
-      // Remove captured red-dot rook
+      // Remove captured rooks from tracking
       if (result.captured === 'r') {
         const oppCk = movingPiece?.color === 'w' ? 'black' : 'white';
-        const capSq = to;
-        room.specialRooks[oppCk] = room.specialRooks[oppCk].filter(s => s !== capSq);
+        room.specialRooks[oppCk] = room.specialRooks[oppCk].filter(s => s !== to);
+        room.doubleRedDotRooks[oppCk] = room.doubleRedDotRooks[oppCk].filter(s => s !== to);
       }
 
       // Remove special from captured pawn
@@ -295,8 +311,28 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
         room.chess.winner = chess.isCheckmate()
           ? chess.turn() === 'w' ? 'black' : 'white'
           : 'draw';
-
         if (room.activeEvent) finalizeEvent(io, room);
+      } else if (chess.isCheck()) {
+        // Custom checkmate: king in check but no valid moves after house rules
+        const cur = chess.turn() as 'w' | 'b';
+        const ck = cur === 'w' ? 'white' : 'black';
+        let legal = chess.moves({ verbose: true });
+        if (room.inactiveKings[ck])  legal = legal.filter(m => chess.get(m.from)?.type !== 'k');
+        if (room.inactiveQueens[ck]) legal = legal.filter(m => chess.get(m.from)?.type !== 'q');
+        legal = legal.filter(m => {
+          if (chess.get(m.from)?.type !== 'r') return true;
+          const dist = Math.max(Math.abs(m.to.charCodeAt(0) - m.from.charCodeAt(0)), Math.abs(parseInt(m.to[1]) - parseInt(m.from[1])));
+          if (room.doubleRedDotRooks[ck].includes(m.from)) return dist <= 1;
+          if (room.specialRooks[ck].includes(m.from))     return dist <= 4;
+          return true;
+        });
+        if (legal.length === 0) {
+          room.chess.status = 'finished';
+          room.chess.winner = cur === 'w' ? 'black' : 'white';
+          if (room.activeEvent) finalizeEvent(io, room);
+        } else if (room.chess.moveCount % MOVES_PER_EVENT === 0) {
+          startEvent(io, room);
+        }
       } else if (room.chess.moveCount % MOVES_PER_EVENT === 0) {
         startEvent(io, room);
       }
@@ -376,6 +412,14 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
 
     event.deviceVotes.set(deviceId, option);
     event.votes[option]++;
+  });
+
+  socket.on('room:anthem-ended', ({ roomId }: { roomId: string }) => {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    if (room.imnTimeout) { clearTimeout(room.imnTimeout); room.imnTimeout = null; }
+    room.imnActive = false;
+    io.to(SOCKET_ROOM(roomId)).emit('room:boardUpdate', getBoardUpdate(room));
   });
 
   socket.on('room:leave', ({ roomId }: { roomId: string }) => {

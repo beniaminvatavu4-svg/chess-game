@@ -44,6 +44,11 @@ export interface SpecialRooks {
   black: string[];
 }
 
+export interface DoubleRedDotRooks {
+  white: string[];
+  black: string[];
+}
+
 export interface InactiveKings {
   white: boolean;
   black: boolean;
@@ -63,8 +68,10 @@ export interface BoardUpdate {
   players: { white: boolean; black: boolean };
   specialPawns: SpecialPawns;
   specialRooks: SpecialRooks;
+  doubleRedDotRooks: DoubleRedDotRooks;
   inactiveKings: InactiveKings;
   inactiveQueens: InactiveQueens;
+  imnActive: boolean;
 }
 
 export interface RoomStatePayload {

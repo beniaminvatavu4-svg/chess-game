@@ -1,5 +1,16 @@
 <div class="player-page">
 
+  @if (boardState?.status === 'finished') {
+    <div class="winner-overlay">
+      <div class="winner-box">
+        <div class="winner-trophy">🏆</div>
+        <div class="winner-text">
+          {{ boardState?.winner === 'draw' ? 'Remiză!' : (boardState?.winner === 'white' ? 'Albul' : 'Negrul') + ' câștigă!' }}
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Status bar -->
   <div class="status-bar">
     <span class="color-badge" [class.white]="color === 'white'" [class.black]="color === 'black'">
@@ -58,7 +69,9 @@
             @if (sq.specialPawn === 'hair') {
               <img class="hair-img" src="hair.png" alt="hair"/>
             }
-            @if (sq.hasRedDot) {
+            @if (sq.hasDoubleRedDot) {
+              <span class="double-red-dot">2</span>
+            } @else if (sq.hasRedDot) {
               <span class="red-dot"></span>
             }
             @if (sq.isInactiveKing) {

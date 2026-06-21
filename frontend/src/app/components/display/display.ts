@@ -17,6 +17,7 @@ interface BoardSquare {
   fileLabel: string | null;
   specialPawn: 'flag' | 'hair' | null;
   hasRedDot: boolean;
+  hasDoubleRedDot: boolean;
   isInactiveKing: boolean;
   isInactiveQueen: boolean;
 }
@@ -55,6 +56,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
   private sub = new Subscription();
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private autoMode = false;
+  private wasImnActive = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -115,14 +117,20 @@ export class DisplayComponent implements OnInit, OnDestroy {
       const prevChess = new Chess(this.boardState.fen);
       const from = update.lastMove.slice(0, 2) as Square;
       const piece = prevChess.get(from);
-      if (piece?.type === 'b') {
-        this.playBishopSound();
-      }
+      if (piece?.type === 'b') this.playBishopSound();
     }
+    if (update.imnActive && !this.wasImnActive) this.playAnthem();
+    this.wasImnActive = update.imnActive;
     this.boardState = update;
     this.chess.load(update.fen);
     this.renderBoard(update.lastMove);
     this.updateStatus();
+  }
+
+  private playAnthem(): void {
+    const audio = new Audio('/sounds/imn.mp3');
+    audio.play().catch(() => {});
+    setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 30000);
   }
 
   private playBishopSound(): void {
@@ -151,6 +159,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
           fileLabel: ri === 7 ? square[0] : null,
           specialPawn: this.getSpecialPawn(square, pieceCode),
           hasRedDot: this.getHasRedDot(square, pieceCode),
+          hasDoubleRedDot: this.getHasDoubleRedDot(square, pieceCode),
           isInactiveKing: this.getIsInactiveKing(pieceCode),
           isInactiveQueen: this.getIsInactiveQueen(pieceCode),
         };
@@ -172,8 +181,14 @@ export class DisplayComponent implements OnInit, OnDestroy {
     if (!pieceCode || pieceCode[1] !== 'r') return false;
     const sr = this.boardState?.specialRooks;
     if (!sr) return false;
-    const list = pieceCode[0] === 'w' ? sr.white : sr.black;
-    return list.includes(square);
+    return (pieceCode[0] === 'w' ? sr.white : sr.black).includes(square);
+  }
+
+  private getHasDoubleRedDot(square: Square, pieceCode: string | null): boolean {
+    if (!pieceCode || pieceCode[1] !== 'r') return false;
+    const dr = this.boardState?.doubleRedDotRooks;
+    if (!dr) return false;
+    return (pieceCode[0] === 'w' ? dr.white : dr.black).includes(square);
   }
 
   private getIsInactiveKing(pieceCode: string | null): boolean {

@@ -16,6 +16,7 @@ interface BoardSquare {
   fileLabel: string | null;
   specialPawn: 'flag' | 'hair' | null;
   hasRedDot: boolean;
+  hasDoubleRedDot: boolean;
   isInactiveKing: boolean;
   isInactiveQueen: boolean;
 }
@@ -127,6 +128,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
           fileLabel: ri === ranks.length - 1 ? square[0] : null,
           specialPawn: this.getSpecialPawn(square, pieceCode),
           hasRedDot: this.getHasRedDot(square, pieceCode),
+          hasDoubleRedDot: this.getHasDoubleRedDot(square, pieceCode),
           isInactiveKing: this.getIsInactiveKing(pieceCode),
           isInactiveQueen: this.getIsInactiveQueen(pieceCode),
         };
@@ -137,6 +139,9 @@ export class PlayerComponent implements OnInit, OnDestroy {
   onSquareClick(sq: BoardSquare): void {
     const ownColor = this.color === 'white' ? 'w' : 'b';
     const myTurn = this.boardState?.status === 'active' && this.chess.turn() === ownColor;
+
+    // Block all interaction during vote or anthem
+    if (this.activeEvent || this.boardState?.imnActive) return;
 
     // Inactive king/queen: block selection entirely
     if ((sq.isInactiveKing || sq.isInactiveQueen) && sq.piece?.[0] === ownColor) return;
@@ -185,8 +190,14 @@ export class PlayerComponent implements OnInit, OnDestroy {
     if (!pieceCode || pieceCode[1] !== 'r') return false;
     const sr = this.boardState?.specialRooks;
     if (!sr) return false;
-    const list = pieceCode[0] === 'w' ? sr.white : sr.black;
-    return list.includes(square);
+    return (pieceCode[0] === 'w' ? sr.white : sr.black).includes(square);
+  }
+
+  private getHasDoubleRedDot(square: Square, pieceCode: string | null): boolean {
+    if (!pieceCode || pieceCode[1] !== 'r') return false;
+    const dr = this.boardState?.doubleRedDotRooks;
+    if (!dr) return false;
+    return (pieceCode[0] === 'w' ? dr.white : dr.black).includes(square);
   }
 
   private getIsInactiveKing(pieceCode: string | null): boolean {
@@ -231,18 +242,21 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
     let moves = this.chess.moves({ square: from, verbose: true });
 
-    // Red-dot rook: filter out moves > 4 squares
+    // Rook movement limits (1 dot = max 4, 2 dots = max 1)
     if (piece?.type === 'r') {
       const sr = this.boardState?.specialRooks;
-      if (sr) {
-        const list = piece.color === 'w' ? sr.white : sr.black;
-        if (list.includes(from)) {
+      const dr = this.boardState?.doubleRedDotRooks;
+      if (sr && dr) {
+        const dlist = piece.color === 'w' ? dr.white : dr.black;
+        const slist = piece.color === 'w' ? sr.white : sr.black;
+        const maxDist = dlist.includes(from) ? 1 : slist.includes(from) ? 4 : 99;
+        if (maxDist < 99) {
           moves = moves.filter(m => {
             const dist = Math.max(
               Math.abs(m.to.charCodeAt(0) - from.charCodeAt(0)),
               Math.abs(parseInt(m.to[1]) - parseInt(from[1])),
             );
-            return dist <= 4;
+            return dist <= maxDist;
           });
         }
       }
@@ -268,6 +282,14 @@ export class PlayerComponent implements OnInit, OnDestroy {
   updateStatus(): void {
     const s = this.boardState;
     if (!s) return;
+    if (this.activeEvent) {
+      this.statusMessage = '🗳️ Votul publicului — mutările sunt blocate!';
+      return;
+    }
+    if (s.imnActive) {
+      this.statusMessage = '🎵 Se cântă imnul — mutările sunt blocate!';
+      return;
+    }
     if (s.status === 'waiting') {
       this.statusMessage = s.players.white && !s.players.black
         ? 'Așteptăm jucătorul 2…'

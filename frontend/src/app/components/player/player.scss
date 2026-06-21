@@ -148,6 +148,45 @@
   pointer-events: none;
 }
 
+.winner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.winner-box {
+  background: #0f3460;
+  border: 3px solid #e94560;
+  border-radius: 16px;
+  padding: 40px 60px;
+  text-align: center;
+}
+
+.winner-trophy { font-size: 4rem; margin-bottom: 12px; }
+.winner-text { font-size: 2rem; font-weight: 700; color: #fff; }
+
+.double-red-dot {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e02020;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
 .inactive-queen {
   position: absolute;
   top: 2px;

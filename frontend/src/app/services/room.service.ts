@@ -64,6 +64,10 @@ export class RoomService implements OnDestroy {
     this.socket.emit('room:vote', { roomId, deviceId, option });
   }
 
+  anthemEnded(roomId: string): void {
+    this.socket.emit('room:anthem-ended', { roomId });
+  }
+
   // ─── Listen ────────────────────────────────────────────────────────────────
 
   onRoomState(): Observable<RoomState> {

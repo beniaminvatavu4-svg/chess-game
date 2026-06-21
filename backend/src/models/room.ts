@@ -1,7 +1,8 @@
-import { BoardUpdate, SpecialPawns, SpecialRooks, InactiveKings, InactiveQueens } from '../types';
+import { BoardUpdate, SpecialPawns, SpecialRooks, DoubleRedDotRooks, InactiveKings, InactiveQueens } from '../types';
 
 export interface ActiveEvent {
   eventId: string;
+  candidateEventIds: [string, string];
   question: string;
   options: [string, string];
   duration: number;
@@ -35,8 +36,12 @@ export interface Room {
     black: { flag: string[]; hair: string[]; missing: string[] };
   };
   specialRooks: SpecialRooks;
+  doubleRedDotRooks: DoubleRedDotRooks;
   inactiveKings: InactiveKings;
   inactiveQueens: InactiveQueens;
+  queensEverActivated: boolean;
+  imnActive: boolean;
+  imnTimeout: ReturnType<typeof setTimeout> | null;
   qr: {
     joinBlack: string;
     audience: string;
@@ -65,7 +70,12 @@ export function getBoardUpdate(room: Room): BoardUpdate {
       white: [...room.specialRooks.white],
       black: [...room.specialRooks.black],
     },
+    doubleRedDotRooks: {
+      white: [...room.doubleRedDotRooks.white],
+      black: [...room.doubleRedDotRooks.black],
+    },
     inactiveKings: { ...room.inactiveKings },
     inactiveQueens: { ...room.inactiveQueens },
+    imnActive: room.imnActive,
   };
 }
