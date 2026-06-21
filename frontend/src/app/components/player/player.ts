@@ -14,6 +14,7 @@ interface BoardSquare {
   isValidMove: boolean;
   rankLabel: string | null;
   fileLabel: string | null;
+  specialPawn: 'flag' | 'hair' | null;
 }
 
 @Component({
@@ -111,14 +112,16 @@ export class PlayerComponent implements OnInit, OnDestroy {
         const rankIdx = this.color === 'black' ? ri : 7 - ri;
         const fileIdx = this.color === 'black' ? 7 - fi : fi;
         const square = (String.fromCharCode(97 + fileIdx) + (rankIdx + 1)) as Square;
+        const pieceCode = cell ? `${cell.color}${cell.type}` : null;
         return {
           square,
-          piece: cell ? `${cell.color}${cell.type}` : null,
+          piece: pieceCode,
           isLight: (ri + fi) % 2 === 0,
           isSelected: false,
           isValidMove: false,
           rankLabel: fi === 0 ? square[1] : null,
           fileLabel: ri === ranks.length - 1 ? square[0] : null,
+          specialPawn: this.getSpecialPawn(square, pieceCode),
         };
       });
     });
@@ -150,6 +153,16 @@ export class PlayerComponent implements OnInit, OnDestroy {
       this.selectedSquare = sq.square;
       this.highlightMoves(sq.square);
     }
+  }
+
+  private getSpecialPawn(square: Square, pieceCode: string | null): 'flag' | 'hair' | null {
+    if (!pieceCode || pieceCode[1] !== 'p') return null;
+    const sp = this.boardState?.specialPawns;
+    if (!sp) return null;
+    const list = pieceCode[0] === 'w' ? sp.white : sp.black;
+    if (list.flag.includes(square)) return 'flag';
+    if (list.hair.includes(square)) return 'hair';
+    return null;
   }
 
   highlightMoves(from: Square): void {

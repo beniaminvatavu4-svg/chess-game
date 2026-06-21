@@ -7,6 +7,11 @@ export type WinnerType = 'white' | 'black' | 'draw' | null;
 
 // ─── Server → Client ─────────────────────────────────────────────────────────
 
+export interface SpecialPawns {
+  white: { flag: string[]; hair: string[] };
+  black: { flag: string[]; hair: string[] };
+}
+
 export interface BoardUpdate {
   fen: string;
   status: GameStatus;
@@ -14,6 +19,7 @@ export interface BoardUpdate {
   currentTurn: 'w' | 'b';
   lastMove: string | null;
   players: { white: boolean; black: boolean };
+  specialPawns: SpecialPawns;
 }
 
 export interface RoomState {

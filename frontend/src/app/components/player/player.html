@@ -48,6 +48,8 @@
             <span class="piece"
               [class.piece-w]="sq.piece?.[0] === 'w'"
               [class.piece-b]="sq.piece?.[0] === 'b'">{{ pieceSymbol(sq.piece) }}</span>
+            @if (sq.specialPawn === 'flag') { <span class="special flag-overlay">🇷🇴</span> }
+            @if (sq.specialPawn === 'hair') { <span class="special hair-overlay">🟣</span> }
           </div>
         }
       </div>

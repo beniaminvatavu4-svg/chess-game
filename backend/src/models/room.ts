@@ -1,4 +1,4 @@
-import { BoardUpdate } from '../types';
+import { BoardUpdate, SpecialPawns } from '../types';
 
 export interface ActiveEvent {
   eventId: string;
@@ -30,6 +30,10 @@ export interface Room {
     audience: Set<string>;
   };
   activeEvent: ActiveEvent | null;
+  specialPawns: {
+    white: { flag: string[]; hair: string[]; missing: string[] };
+    black: { flag: string[]; hair: string[]; missing: string[] };
+  };
   qr: {
     joinBlack: string;
     audience: string;
@@ -49,6 +53,10 @@ export function getBoardUpdate(room: Room): BoardUpdate {
     players: {
       white: !!room.sockets.white,
       black: !!room.sockets.black,
+    },
+    specialPawns: {
+      white: { flag: room.specialPawns.white.flag, hair: room.specialPawns.white.hair },
+      black: { flag: room.specialPawns.black.flag, hair: room.specialPawns.black.hair },
     },
   };
 }
