@@ -167,6 +167,19 @@
   pointer-events: none;
 }
 
+.red-dot {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #e02020;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
 // Coordinate labels
 .coord {
   position: absolute;

@@ -164,6 +164,22 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
       const promotion = move.length >= 5 ? move[4] : 'q';
 
       const movingPiece = chess.get(from);
+
+      // Red-dot rook: block moves exceeding 4 squares
+      if (movingPiece?.type === 'r') {
+        const ck = movingPiece.color === 'w' ? 'white' : 'black';
+        if (room.specialRooks[ck].includes(from)) {
+          const dist = Math.max(
+            Math.abs(to.charCodeAt(0) - from.charCodeAt(0)),
+            Math.abs(parseInt(to[1]) - parseInt(from[1])),
+          );
+          if (dist > 4) {
+            socket.emit('room:error', { message: 'Red-dot rook can only move 4 squares' });
+            return;
+          }
+        }
+      }
+
       const result = chess.move({ from, to, promotion });
 
       // Track special pawn overlays through moves
@@ -178,6 +194,33 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
           sp.hair = sp.hair.filter(s => s !== to);
         }
       }
+      // Track red-dot rook movements
+      if (movingPiece?.type === 'r') {
+        const ck = movingPiece.color === 'w' ? 'white' : 'black';
+        const ri = room.specialRooks[ck].indexOf(from);
+        if (ri !== -1) room.specialRooks[ck][ri] = to;
+      }
+      // Track rook movement during castling
+      if (result.flags.includes('k')) {
+        const ck = movingPiece?.color === 'w' ? 'white' : 'black';
+        const rookFrom = movingPiece?.color === 'w' ? 'h1' : 'h8';
+        const rookTo   = movingPiece?.color === 'w' ? 'f1' : 'f8';
+        const ri = room.specialRooks[ck].indexOf(rookFrom);
+        if (ri !== -1) room.specialRooks[ck][ri] = rookTo;
+      } else if (result.flags.includes('q')) {
+        const ck = movingPiece?.color === 'w' ? 'white' : 'black';
+        const rookFrom = movingPiece?.color === 'w' ? 'a1' : 'a8';
+        const rookTo   = movingPiece?.color === 'w' ? 'd1' : 'd8';
+        const ri = room.specialRooks[ck].indexOf(rookFrom);
+        if (ri !== -1) room.specialRooks[ck][ri] = rookTo;
+      }
+      // Remove captured red-dot rook
+      if (result.captured === 'r') {
+        const oppCk = movingPiece?.color === 'w' ? 'black' : 'white';
+        const capSq = to;
+        room.specialRooks[oppCk] = room.specialRooks[oppCk].filter(s => s !== capSq);
+      }
+
       // Remove special from captured pawn
       if (result.captured === 'p') {
         const oppCk = movingPiece && movingPiece.color === 'w' ? 'black' : 'white';

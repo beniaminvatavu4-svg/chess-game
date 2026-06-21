@@ -12,6 +12,11 @@ export interface SpecialPawns {
   black: { flag: string[]; hair: string[] };
 }
 
+export interface SpecialRooks {
+  white: string[];
+  black: string[];
+}
+
 export interface BoardUpdate {
   fen: string;
   status: GameStatus;
@@ -20,6 +25,7 @@ export interface BoardUpdate {
   lastMove: string | null;
   players: { white: boolean; black: boolean };
   specialPawns: SpecialPawns;
+  specialRooks: SpecialRooks;
 }
 
 export interface RoomState {

@@ -14,6 +14,7 @@ interface BoardSquare {
   rankLabel: string | null;
   fileLabel: string | null;
   specialPawn: 'flag' | 'hair' | null;
+  hasRedDot: boolean;
 }
 
 @Component({
@@ -110,6 +111,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
           rankLabel: fi === 0 ? square[1] : null,
           fileLabel: ri === 7 ? square[0] : null,
           specialPawn: this.getSpecialPawn(square, pieceCode),
+          hasRedDot: this.getHasRedDot(square, pieceCode),
         };
       }),
     );
@@ -123,6 +125,14 @@ export class DisplayComponent implements OnInit, OnDestroy {
     if (list.flag.includes(square)) return 'flag';
     if (list.hair.includes(square)) return 'hair';
     return null;
+  }
+
+  private getHasRedDot(square: Square, pieceCode: string | null): boolean {
+    if (!pieceCode || pieceCode[1] !== 'r') return false;
+    const sr = this.boardState?.specialRooks;
+    if (!sr) return false;
+    const list = pieceCode[0] === 'w' ? sr.white : sr.black;
+    return list.includes(square);
   }
 
   updateStatus(): void {

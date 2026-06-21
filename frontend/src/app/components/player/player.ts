@@ -15,6 +15,7 @@ interface BoardSquare {
   rankLabel: string | null;
   fileLabel: string | null;
   specialPawn: 'flag' | 'hair' | null;
+  hasRedDot: boolean;
 }
 
 @Component({
@@ -122,6 +123,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
           rankLabel: fi === 0 ? square[1] : null,
           fileLabel: ri === ranks.length - 1 ? square[0] : null,
           specialPawn: this.getSpecialPawn(square, pieceCode),
+          hasRedDot: this.getHasRedDot(square, pieceCode),
         };
       });
     });
@@ -171,8 +173,35 @@ export class PlayerComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  private getHasRedDot(square: Square, pieceCode: string | null): boolean {
+    if (!pieceCode || pieceCode[1] !== 'r') return false;
+    const sr = this.boardState?.specialRooks;
+    if (!sr) return false;
+    const list = pieceCode[0] === 'w' ? sr.white : sr.black;
+    return list.includes(square);
+  }
+
   highlightMoves(from: Square): void {
-    const moves = this.chess.moves({ square: from, verbose: true });
+    let moves = this.chess.moves({ square: from, verbose: true });
+
+    // Red-dot rook: filter out moves > 4 squares
+    const piece = this.chess.get(from);
+    if (piece?.type === 'r') {
+      const sr = this.boardState?.specialRooks;
+      if (sr) {
+        const list = piece.color === 'w' ? sr.white : sr.black;
+        if (list.includes(from)) {
+          moves = moves.filter(m => {
+            const dist = Math.max(
+              Math.abs(m.to.charCodeAt(0) - from.charCodeAt(0)),
+              Math.abs(parseInt(m.to[1]) - parseInt(from[1])),
+            );
+            return dist <= 4;
+          });
+        }
+      }
+    }
+
     const targets = new Set(moves.map((m) => m.to));
     this.board = this.board.map((rank) =>
       rank.map((sq) => ({

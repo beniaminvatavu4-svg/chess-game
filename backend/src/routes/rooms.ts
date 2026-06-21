@@ -62,6 +62,10 @@ router.post('/', async (req: Request, res: Response) => {
 
   const chess = new Chess();
   const specialPawns = generateSpecialPawns(chess);
+  const specialRooks: Room['specialRooks'] = {
+    white: (['a1', 'h1'] as const).filter(() => Math.random() < 0.5),
+    black: (['a8', 'h8'] as const).filter(() => Math.random() < 0.5),
+  };
 
   const room: Room = {
     roomId,
@@ -82,6 +86,7 @@ router.post('/', async (req: Request, res: Response) => {
     },
     activeEvent: null,
     specialPawns,
+    specialRooks,
     qr: { joinBlack: qrJoinBlack, audience: qrAudience },
     createdAt: new Date(),
   };
