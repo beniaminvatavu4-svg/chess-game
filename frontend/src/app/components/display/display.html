@@ -15,6 +15,9 @@
   <div class="header">
     <div class="room-code">{{ roomId }}</div>
     <div class="status-msg">{{ statusMessage }}</div>
+    @if (!audioEnabled) {
+      <button class="enable-audio-btn" (click)="enableAudio()">🔊 Activează sunetul</button>
+    }
   </div>
 
   <!-- Event overlay -->

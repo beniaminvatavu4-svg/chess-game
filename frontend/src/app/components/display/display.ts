@@ -47,6 +47,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
 
   boardState: BoardUpdate | null = null;
   statusMessage = 'Conectare…';
+  audioEnabled = false;
 
   qrAudience = '';
 
@@ -127,13 +128,21 @@ export class DisplayComponent implements OnInit, OnDestroy {
     this.updateStatus();
   }
 
+  enableAudio(): void {
+    const silent = new Audio(this.bishopSounds[0]);
+    silent.volume = 0;
+    silent.play().then(() => { silent.pause(); this.audioEnabled = true; }).catch(() => { this.audioEnabled = true; });
+  }
+
   private playAnthem(): void {
+    if (!this.audioEnabled) return;
     const audio = new Audio('/sounds/imn.mp3');
     audio.play().catch(() => {});
     setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 30000);
   }
 
   private playBishopSound(): void {
+    if (!this.audioEnabled) return;
     const src = this.bishopSounds[Math.floor(Math.random() * this.bishopSounds.length)];
     const audio = new Audio(src);
     audio.play().catch(() => {});
