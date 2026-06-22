@@ -95,6 +95,7 @@ router.post('/', async (req: Request, res: Response) => {
     imnTimeout: null,
     boardRotated: false,
     boardRotatedTimeout: null,
+    borderActive: false,
     qr: { joinBlack: qrJoinBlack, audience: qrAudience },
     createdAt: new Date(),
   };

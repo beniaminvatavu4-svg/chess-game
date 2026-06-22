@@ -117,6 +117,16 @@
   overflow: hidden;
   transition: transform 0.6s ease;
   &.rotated { transform: rotate(90deg); }
+  &.has-border {
+    border: 16px solid transparent;
+    border-image: repeating-linear-gradient(
+      45deg,
+      #f5a623 0px,
+      #f5a623 12px,
+      #1a1a1a 12px,
+      #1a1a1a 24px
+    ) 16;
+  }
 }
 
 .rank { display: flex; }

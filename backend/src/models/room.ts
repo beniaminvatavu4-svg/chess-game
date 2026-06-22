@@ -44,6 +44,7 @@ export interface Room {
   imnTimeout: ReturnType<typeof setTimeout> | null;
   boardRotated: boolean;
   boardRotatedTimeout: ReturnType<typeof setTimeout> | null;
+  borderActive: boolean;
   qr: {
     joinBlack: string;
     audience: string;
@@ -80,5 +81,6 @@ export function getBoardUpdate(room: Room): BoardUpdate {
     inactiveQueens: { ...room.inactiveQueens },
     imnActive: room.imnActive,
     boardRotated: room.boardRotated,
+    borderActive: room.borderActive,
   };
 }

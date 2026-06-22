@@ -43,7 +43,7 @@
   }
 
   <!-- Chess board -->
-  <div class="board" [class.rotated]="boardState?.boardRotated">
+  <div class="board" [class.rotated]="boardState?.boardRotated" [class.has-border]="boardState?.borderActive">
     @for (rank of board; track $index) {
       <div class="rank">
         @for (sq of rank; track sq.square) {

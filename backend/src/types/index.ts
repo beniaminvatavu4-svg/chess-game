@@ -73,6 +73,7 @@ export interface BoardUpdate {
   inactiveQueens: InactiveQueens;
   imnActive: boolean;
   boardRotated: boolean;
+  borderActive: boolean;
 }
 
 export interface RoomStatePayload {

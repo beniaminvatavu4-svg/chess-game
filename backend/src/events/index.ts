@@ -59,6 +59,11 @@ export const EVENT_DEFINITIONS: EventDefinition[] = [
     question: '🍺 Publicul e beat — jocul se rotește 30 de secunde',
     options: ['Da', 'Nu'],
   },
+  {
+    eventId: 'borduri',
+    question: '🚧 Se construiesc borduri — tabla primește borduri de șantier',
+    options: ['Da', 'Nu'],
+  },
 ];
 
 function isEventEligible(eventId: string, room: Room): boolean {
@@ -76,6 +81,8 @@ function isEventEligible(eventId: string, room: Room): boolean {
       return room.inactiveKings.white || room.inactiveKings.black;
     case 'mor_regii':
       return !room.inactiveKings.white || !room.inactiveKings.black;
+    case 'borduri':
+      return !room.borderActive;
     default:
       return true;
   }
@@ -237,6 +244,11 @@ export function applyEventEffect(
           io.to(socketRoomId).emit('room:boardUpdate', getBoardUpdate(room));
         }, 30000);
       }
+      break;
+    }
+
+    case 'borduri': {
+      room.borderActive = true;
       break;
     }
 
