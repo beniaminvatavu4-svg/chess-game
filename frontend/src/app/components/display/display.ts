@@ -48,6 +48,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
   boardState: BoardUpdate | null = null;
   statusMessage = 'Conectare…';
   audioEnabled = false;
+  boardRotated = false;
   private unlockHandler = () => this.enableAudio();
 
   qrAudience = '';

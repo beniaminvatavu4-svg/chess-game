@@ -54,6 +54,11 @@ export const EVENT_DEFINITIONS: EventDefinition[] = [
     question: '💀 Mor regii — ambii regi sunt blocați din nou',
     options: ['Da', 'Nu'],
   },
+  {
+    eventId: 'publicul_beat',
+    question: '🍺 Publicul e beat — jocul se rotește 30 de secunde',
+    options: ['Da', 'Nu'],
+  },
 ];
 
 function isEventEligible(eventId: string, room: Room): boolean {
@@ -218,6 +223,20 @@ export function applyEventEffect(
     case 'mor_regii': {
       room.inactiveKings.white = true;
       room.inactiveKings.black = true;
+      break;
+    }
+
+    case 'publicul_beat': {
+      room.boardRotated = true;
+      if (room.boardRotatedTimeout) clearTimeout(room.boardRotatedTimeout);
+      if (io && socketRoomId) {
+        io.to(socketRoomId).emit('room:boardUpdate', getBoardUpdate(room));
+        room.boardRotatedTimeout = setTimeout(() => {
+          room.boardRotated = false;
+          room.boardRotatedTimeout = null;
+          io.to(socketRoomId).emit('room:boardUpdate', getBoardUpdate(room));
+        }, 30000);
+      }
       break;
     }
 

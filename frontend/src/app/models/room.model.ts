@@ -45,6 +45,7 @@ export interface BoardUpdate {
   inactiveKings: InactiveKings;
   inactiveQueens: InactiveQueens;
   imnActive: boolean;
+  boardRotated: boolean;
 }
 
 export interface RoomState {

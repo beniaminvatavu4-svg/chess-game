@@ -43,6 +43,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
   activeEvent: EventStart | null = null;
   eventResult: EventResult | null = null;
+  boardRotated = false;
 
   private sub = new Subscription();
 
