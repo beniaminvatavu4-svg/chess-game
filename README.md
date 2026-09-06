@@ -1,23 +1,30 @@
 # Chess Game — Linkuri utile
 
+## 🎮 Flux de joc (stream)
+
+1. **Tu (Alb/Host)** → deschizi `/host`, creezi meciul, dai click „Joacă ca Alb"
+2. **Adversarul (Negru)** → deschide `/join`, intră automat în jocul tău curent
+3. **Spectatorii** → deschid `/watch`, văd tabla live
+
+---
+
 ## 🌐 Producție (Railway)
 
 | Rol | Link |
 |-----|------|
-| **Host** — creezi o cameră nouă | https://chess-game-production-6550.up.railway.app/host |
-| **Spectate** — urmărești ultimul meci (auto) | https://chess-game-production-6550.up.railway.app/spectate |
-| **Jucător 2** — primit prin QR de la host | https://chess-game-production-6550.up.railway.app/play/{roomId}?token={token} |
-| **Audience** — vot public | https://chess-game-production-6550.up.railway.app/audience/{roomId} |
-| **Spectate cameră specifică** | https://chess-game-production-6550.up.railway.app/spectate/{roomId} |
+| **Host** — creezi meciul | https://chess-game-production-6550.up.railway.app/host |
+| **Adversar (Negru)** — join automat | https://chess-game-production-6550.up.railway.app/join |
+| **Spectatori** — watch live | https://chess-game-production-6550.up.railway.app/watch |
 
 ## 💻 Local (development)
 
 | Rol | Link |
 |-----|------|
 | **Host** | http://localhost:4200/host |
-| **Spectate** (auto ultimul meci) | http://localhost:4200/spectate |
-| **Jucător 2** | http://localhost:4200/play/{roomId}?token={token} |
-| **Audience** | http://localhost:4200/audience/{roomId} |
+| **Adversar (Negru)** | http://localhost:4200/join |
+| **Spectatori** | http://localhost:4200/watch |
+
+---
 
 ## 🚀 Cum pornești local
 

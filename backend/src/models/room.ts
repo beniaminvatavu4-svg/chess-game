@@ -5,12 +5,6 @@ export interface ActiveEvent {
   candidateEventIds: [string, string];
   question: string;
   options: [string, string];
-  duration: number;
-  secondsLeft: number;
-  votes: [number, number];
-  deviceVotes: Map<string, 0 | 1>;
-  tickInterval: ReturnType<typeof setInterval> | null;
-  endTimer: ReturnType<typeof setTimeout> | null;
 }
 
 export interface Room {

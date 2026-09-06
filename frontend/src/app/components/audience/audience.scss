@@ -127,3 +127,53 @@
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+.winner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: overlayFadeIn 0.4s ease;
+}
+
+.winner-box {
+  background: linear-gradient(135deg, #0f3460, #16213e);
+  border: 3px solid #e94560;
+  border-radius: 20px;
+  padding: 48px 56px;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(233,69,96,0.4);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.winner-trophy { font-size: 5rem; margin-bottom: 16px; }
+.winner-text { font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: 1px; }
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.error-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+.error-icon { font-size: 64px; }
+.error-text {
+  font-size: 20px;
+  color: #ff6b6b;
+  max-width: 280px;
+  line-height: 1.5;
+}

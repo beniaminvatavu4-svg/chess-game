@@ -1,33 +1,38 @@
 <div class="audience-page">
 
-  <!-- Game status -->
-  <div class="game-status">{{ gameStatusText }}</div>
-  <div class="room-label">Meci: <strong>{{ roomId }}</strong></div>
-
-  <!-- Voting active -->
-  @if (activeEvent && !hasVoted) {
-    <div class="vote-section">
-      <div class="vote-question">{{ activeEvent.question }}</div>
-      <div class="vote-timer">{{ activeEvent.secondsLeft }}s</div>
-      <div class="vote-buttons">
-        <button class="vote-btn opt-a" (click)="vote(0)">
-          {{ activeEvent.options[0] }}
-        </button>
-        <button class="vote-btn opt-b" (click)="vote(1)">
-          {{ activeEvent.options[1] }}
-        </button>
+  @if (boardState?.status === 'finished') {
+    <div class="winner-overlay">
+      <div class="winner-box">
+        <div class="winner-trophy">🏆</div>
+        <div class="winner-text">
+          {{ boardState?.winner === 'draw' ? 'Remiză!' : (boardState?.winner === 'white' ? 'Albul' : 'Negrul') + ' câștigă!' }}
+        </div>
       </div>
     </div>
   }
 
-  <!-- Voted — waiting for result -->
-  @if (activeEvent && hasVoted) {
-    <div class="voted-waiting">
+  @if (errorMessage) {
+    <div class="error-screen">
+      <div class="error-icon">🚫</div>
+      <div class="error-text">{{ errorMessage }}</div>
+    </div>
+  }
+
+  @if (!errorMessage) {
+
+  <!-- Game status -->
+  <div class="game-status">{{ gameStatusText }}</div>
+
+  <!-- Event active -->
+  @if (activeEvent) {
+    <div class="vote-section">
       <div class="vote-question">{{ activeEvent.question }}</div>
-      <div class="voted-badge">
-        ✅ Ai votat: <strong>{{ activeEvent.options[votedOption!] }}</strong>
+      <div class="event-options">
+        <span>1 — {{ activeEvent.options[0] }}</span>
+        <span class="vs">vs</span>
+        <span>2 — {{ activeEvent.options[1] }}</span>
       </div>
-      <div class="vote-timer dim">{{ activeEvent.secondsLeft }}s rămași</div>
+      <p class="event-note">Hostul alege evenimentul…</p>
     </div>
   }
 
@@ -59,5 +64,7 @@
       <p class="hint">Un eveniment va apărea în curând — fii pregătit să votezi! 🎲</p>
     </div>
   }
+
+  } <!-- end @if (!errorMessage) -->
 
 </div>

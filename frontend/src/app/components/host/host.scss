@@ -27,55 +27,38 @@
 
 .setup-grid {
   display: flex;
-  gap: 48px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.qr-card {
-  display: flex;
   flex-direction: column;
+  gap: 20px;
   align-items: center;
+  width: 100%;
+  max-width: 560px;
+}
+
+.link-card {
+  width: 100%;
   background: #16213e;
-  border-radius: 12px;
-  padding: 24px;
-  gap: 12px;
-
-  h2 { margin: 0; font-size: 1.2rem; }
-  .hint { color: #888; font-size: 0.85rem; margin: 0; }
-}
-
-.qr-img {
-  width: 240px;
-  height: 240px;
-  border-radius: 8px;
-  background: #fff;
-  padding: 8px;
-}
-
-.room-code {
-  font-size: 1.4rem;
-  letter-spacing: 0.15em;
-  background: #0f3460;
-  padding: 6px 18px;
-  border-radius: 6px;
-}
-
-.actions-panel {
+  border-radius: 10px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  min-width: 280px;
+  gap: 10px;
 }
 
-.room-badge {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.link-label {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
 
-  .label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.1em; }
-  .code { font-size: 2.5rem; font-weight: 700; letter-spacing: 0.2em; color: #e94560; }
+.link-url {
+  flex: 1;
+  background: #0d0d1a;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  word-break: break-all;
+  color: #e94560;
 }
 
 .btn-primary {
@@ -93,14 +76,6 @@
 }
 
 .btn-play { font-size: 1.2rem; padding: 16px 32px; }
-
-.spectate-block {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  .label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.1em; }
-}
 
 .copy-row {
   display: flex;

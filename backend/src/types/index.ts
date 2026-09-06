@@ -20,10 +20,10 @@ export interface MakeMovePayload {
   move: string; // UCI notation e.g. "e2e4"
 }
 
-export interface VotePayload {
+export interface HostPickPayload {
   roomId: string;
-  deviceId: string; // persistent UUID from localStorage
-  option: 0 | 1;
+  token: string;
+  choice: 0 | 1;
 }
 
 export interface TeleportFlagPawnPayload {
@@ -82,19 +82,13 @@ export interface RoomStatePayload {
   color?: PlayerColor; // only for players
   board: BoardUpdate;
   activeEvent: EventStartPayload | null;
-  qrAudience?: string; // base64 data URI, only sent to spectators
+  qrAudience?: string;
 }
 
 export interface EventStartPayload {
   eventId: string;
   question: string;
   options: [string, string];
-  duration: number;    // total seconds
-  secondsLeft: number;
-}
-
-export interface EventTickPayload {
-  secondsLeft: number;
 }
 
 export interface EventResultPayload {

@@ -60,6 +60,8 @@ export class DisplayComponent implements OnInit, OnDestroy {
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private autoMode = false;
   private wasImnActive = false;
+  private audioPool: HTMLAudioElement[] = [];
+  private anthemAudio: HTMLAudioElement | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -67,6 +69,16 @@ export class DisplayComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Preload all sounds so first play is instant (no network delay)
+    this.audioPool = this.bishopSounds.map(src => {
+      const a = new Audio(src);
+      a.preload = 'auto';
+      return a;
+    });
+    this.anthemAudio = new Audio('/sounds/imn.mp3');
+    this.anthemAudio.preload = 'auto';
+
+    this.enableAudio();
     document.addEventListener('click', this.unlockHandler, { once: true });
     document.addEventListener('keydown', this.unlockHandler, { once: true });
     document.addEventListener('touchstart', this.unlockHandler, { once: true });
@@ -83,7 +95,6 @@ export class DisplayComponent implements OnInit, OnDestroy {
 
     this.sub.add(
       this.roomService.onRoomState().subscribe((state) => {
-        this.qrAudience = state.qrAudience ?? '';
         this.applyBoardUpdate(state.board);
         this.activeEvent = state.activeEvent;
       }),
@@ -99,14 +110,6 @@ export class DisplayComponent implements OnInit, OnDestroy {
       this.roomService.onEventStart().subscribe((event) => {
         this.activeEvent = event;
         this.eventResult = null;
-      }),
-    );
-
-    this.sub.add(
-      this.roomService.onEventTick().subscribe((tick) => {
-        if (this.activeEvent) {
-          this.activeEvent = { ...this.activeEvent, secondsLeft: tick.secondsLeft };
-        }
       }),
     );
 
@@ -135,24 +138,29 @@ export class DisplayComponent implements OnInit, OnDestroy {
   }
 
   enableAudio(): void {
-    const silent = new Audio(this.bishopSounds[0]);
+    if (this.audioPool.length === 0) { this.audioEnabled = true; return; }
+    const silent = this.audioPool[0];
+    const prev = silent.volume;
     silent.volume = 0;
-    silent.play().then(() => { silent.pause(); this.audioEnabled = true; }).catch(() => { this.audioEnabled = true; });
+    silent.play()
+      .then(() => { silent.pause(); silent.currentTime = 0; silent.volume = prev; this.audioEnabled = true; })
+      .catch(() => { this.audioEnabled = true; });
   }
 
   private playAnthem(): void {
-    if (!this.audioEnabled) return;
-    const audio = new Audio('/sounds/imn.mp3');
-    audio.play().catch(() => {});
-    setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 30000);
+    if (!this.audioEnabled || !this.anthemAudio) return;
+    this.anthemAudio.currentTime = 0;
+    this.anthemAudio.play().catch(() => {});
+    setTimeout(() => {
+      if (this.anthemAudio) { this.anthemAudio.pause(); this.anthemAudio.currentTime = 0; }
+    }, 30000);
   }
 
   private playBishopSound(): void {
-    if (!this.audioEnabled) return;
-    const src = this.bishopSounds[Math.floor(Math.random() * this.bishopSounds.length)];
-    const audio = new Audio(src);
+    if (!this.audioEnabled || this.audioPool.length === 0) return;
+    const audio = this.audioPool[Math.floor(Math.random() * this.audioPool.length)];
+    audio.currentTime = 0;
     audio.play().catch(() => {});
-    setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 2000);
   }
 
   renderBoard(lastMove: string | null): void {
@@ -235,8 +243,8 @@ export class DisplayComponent implements OnInit, OnDestroy {
   pieceSymbol(code: string | null): string {
     if (!code) return '';
     const map: Record<string, string> = {
-      wp: '♟', wr: '♜', wn: '♞', wb: '♝', wq: '♛', wk: '♚',
-      bp: '♟', br: '♜', bn: '♞', bb: '♝', bq: '♛', bk: '♚',
+      wp: '♙︎', wr: '♖︎', wn: '♘︎', wb: '♗︎', wq: '♕︎', wk: '♔︎',
+      bp: '♟︎', br: '♜︎', bn: '♞︎', bb: '♝︎', bq: '♛︎', bk: '♚︎',
     };
     return map[code] ?? '';
   }
@@ -265,6 +273,7 @@ export class DisplayComponent implements OnInit, OnDestroy {
     document.removeEventListener('keydown', this.unlockHandler);
     document.removeEventListener('touchstart', this.unlockHandler);
     if (this.pollTimer) clearInterval(this.pollTimer);
+    this.anthemAudio?.pause();
     this.sub.unsubscribe();
   }
 }

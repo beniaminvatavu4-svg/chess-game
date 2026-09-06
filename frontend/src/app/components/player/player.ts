@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Chess, Square } from 'chess.js';
 import { Subscription } from 'rxjs';
 import { RoomService } from '../../services/room.service';
@@ -49,6 +49,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private roomService: RoomService,
   ) {}
 
@@ -76,14 +77,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
       this.roomService.onEventStart().subscribe((event) => {
         this.activeEvent = event;
         this.eventResult = null;
-      }),
-    );
-
-    this.sub.add(
-      this.roomService.onEventTick().subscribe((tick) => {
-        if (this.activeEvent) {
-          this.activeEvent = { ...this.activeEvent, secondsLeft: tick.secondsLeft };
-        }
       }),
     );
 
@@ -308,11 +301,19 @@ export class PlayerComponent implements OnInit, OnDestroy {
     this.statusMessage = myTurn ? 'Rândul tău' : 'Rândul adversarului';
   }
 
+  hostPick(choice: 0 | 1): void {
+    this.roomService.hostPick(this.roomId, this.token, choice);
+  }
+
+  newGame(): void {
+    this.router.navigate(['/host']);
+  }
+
   pieceSymbol(code: string | null): string {
     if (!code) return '';
     const map: Record<string, string> = {
-      wp: '♟', wr: '♜', wn: '♞', wb: '♝', wq: '♛', wk: '♚',
-      bp: '♟', br: '♜', bn: '♞', bb: '♝', bq: '♛', bk: '♚',
+      wp: '♙︎', wr: '♖︎', wn: '♘︎', wb: '♗︎', wq: '♕︎', wk: '♔︎',
+      bp: '♟︎', br: '♜︎', bn: '♞︎', bb: '♝︎', bq: '♛︎', bk: '♚︎',
     };
     return map[code] ?? '';
   }

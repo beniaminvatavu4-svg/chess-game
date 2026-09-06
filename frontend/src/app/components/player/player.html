@@ -8,6 +8,9 @@
           {{ boardState?.winner === 'draw' ? 'Remiză!' : (boardState?.winner === 'white' ? 'Albul' : 'Negrul') + ' câștigă!' }}
         </div>
       </div>
+      @if (color === 'white') {
+        <button class="new-game-btn" (click)="newGame()">Joc Nou →</button>
+      }
     </div>
   }
 
@@ -17,20 +20,25 @@
       {{ color === 'white' ? '♔ Alb' : '♚ Negru' }}
     </span>
     <span class="status-msg">{{ statusMessage }}</span>
-    <span class="room-id">{{ roomId }}</span>
   </div>
 
   <!-- Event overlay -->
   @if (activeEvent) {
     <div class="event-banner">
       <div class="event-question">{{ activeEvent.question }}</div>
-      <div class="event-countdown">{{ activeEvent.secondsLeft }}s</div>
       <div class="event-options">
-        <span class="opt">{{ activeEvent.options[0] }}</span>
+        <span class="opt"><strong>1</strong> — {{ activeEvent.options[0] }}</span>
         <span class="vs">vs</span>
-        <span class="opt">{{ activeEvent.options[1] }}</span>
+        <span class="opt"><strong>2</strong> — {{ activeEvent.options[1] }}</span>
       </div>
-      <p class="event-note">Publicul votează acum…</p>
+      @if (color === 'white') {
+        <div class="pick-buttons">
+          <button class="pick-btn" (click)="hostPick(0)">Alege 1</button>
+          <button class="pick-btn" (click)="hostPick(1)">Alege 2</button>
+        </div>
+      } @else {
+        <p class="event-note">Hostul alege…</p>
+      }
     </div>
   }
 

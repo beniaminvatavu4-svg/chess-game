@@ -5,7 +5,7 @@ import { pickTwoRandomEvents, applyEventEffect } from '../events';
 import {
   JoinRoomPayload,
   MakeMovePayload,
-  VotePayload,
+  HostPickPayload,
   TeleportFlagPawnPayload,
   RoomStatePayload,
   EventStartPayload,
@@ -13,7 +13,6 @@ import {
 } from '../types';
 
 const MOVES_PER_EVENT = 6;
-const EVENT_DURATION_S = parseInt(process.env.EVENT_DURATION_S ?? '10', 10);
 
 const SOCKET_ROOM = (roomId: string) => `room:${roomId}`;
 
@@ -21,7 +20,7 @@ const SOCKET_ROOM = (roomId: string) => `room:${roomId}`;
 
 function startEvent(io: Server, room: Room): void {
   if (room.chess.status !== 'active') return;
-  if (room.activeEvent) return; // already running
+  if (room.activeEvent) return;
 
   const [def0, def1] = pickTwoRandomEvents(room);
   const event: ActiveEvent = {
@@ -29,12 +28,6 @@ function startEvent(io: Server, room: Room): void {
     candidateEventIds: [def0.eventId, def1.eventId],
     question: '🗳️ Ce se întâmplă?',
     options: [def0.question, def1.question],
-    duration: EVENT_DURATION_S,
-    secondsLeft: EVENT_DURATION_S,
-    votes: [0, 0],
-    deviceVotes: new Map(),
-    tickInterval: null,
-    endTimer: null,
   };
   room.activeEvent = event;
 
@@ -42,39 +35,19 @@ function startEvent(io: Server, room: Room): void {
     eventId: event.eventId,
     question: event.question,
     options: event.options,
-    duration: event.duration,
-    secondsLeft: event.secondsLeft,
   };
   io.to(SOCKET_ROOM(room.roomId)).emit('room:event:start', payload);
-
-  event.tickInterval = setInterval(() => {
-    event.secondsLeft = Math.max(0, event.secondsLeft - 1);
-    io.to(SOCKET_ROOM(room.roomId)).emit('room:event:tick', {
-      secondsLeft: event.secondsLeft,
-    });
-    if (event.secondsLeft <= 0 && event.tickInterval) {
-      clearInterval(event.tickInterval);
-      event.tickInterval = null;
-    }
-  }, 1000);
-
-  event.endTimer = setTimeout(() => finalizeEvent(io, room), EVENT_DURATION_S * 1000);
 }
 
-function finalizeEvent(io: Server, room: Room): void {
+function finalizeEvent(io: Server, room: Room, winningOption: 0 | 1): void {
   const event = room.activeEvent;
   if (!event) return;
-
-  if (event.tickInterval) { clearInterval(event.tickInterval); event.tickInterval = null; }
-  if (event.endTimer) { clearTimeout(event.endTimer); event.endTimer = null; }
-
-  const winningOption: 0 | 1 = event.votes[0] >= event.votes[1] ? 0 : 1;
 
   const result: EventResultPayload = {
     eventId: event.eventId,
     options: event.options,
     winningOption,
-    votes: event.votes,
+    votes: [0, 0],
   };
   io.to(SOCKET_ROOM(room.roomId)).emit('room:event:result', result);
 
@@ -87,6 +60,8 @@ function finalizeEvent(io: Server, room: Room): void {
 }
 
 // ─── Socket handlers ─────────────────────────────────────────────────────────
+
+const MAX_AUDIENCE = 300;
 
 export function registerRoomHandlers(io: Server, socket: Socket): void {
 
@@ -107,9 +82,11 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
       if (token === room.tokens.white) {
         color = 'white';
         room.sockets.white = socket.id;
+        console.log(`[${roomId}] Player WHITE joined (${socket.id})`);
       } else if (token === room.tokens.black) {
         color = 'black';
         room.sockets.black = socket.id;
+        console.log(`[${roomId}] Player BLACK joined (${socket.id})`);
       } else {
         socket.emit('room:error', { message: 'Invalid token' });
         return;
@@ -120,8 +97,16 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
       }
     } else if (role === 'spectator') {
       room.sockets.spectators.add(socket.id);
+      console.log(`[${roomId}] Spectator joined (total: ${room.sockets.spectators.size})`);
     } else if (role === 'audience') {
+      const total = room.sockets.audience.size + room.sockets.spectators.size;
+      if (total >= MAX_AUDIENCE) {
+        socket.emit('room:error', { message: 'Sala este plină. Încearcă mai târziu.' });
+        console.log(`[${roomId}] Audience REJECTED — limit ${MAX_AUDIENCE} reached`);
+        return;
+      }
       room.sockets.audience.add(socket.id);
+      console.log(`[${roomId}] Audience joined (total: ${room.sockets.audience.size})`);
     }
 
     socket.join(SOCKET_ROOM(roomId));
@@ -131,8 +116,6 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
           eventId: room.activeEvent.eventId,
           question: room.activeEvent.question,
           options: room.activeEvent.options,
-          duration: room.activeEvent.duration,
-          secondsLeft: room.activeEvent.secondsLeft,
         }
       : null;
 
@@ -153,10 +136,6 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
     const room = rooms.get(roomId);
     if (!room || room.chess.status !== 'active') return;
 
-    if (room.activeEvent) {
-      socket.emit('room:error', { message: 'Nu poți muta în timpul votului!' });
-      return;
-    }
     if (room.imnActive) {
       socket.emit('room:error', { message: 'Se cântă imnul — nu poți muta!' });
       return;
@@ -311,7 +290,7 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
         room.chess.winner = chess.isCheckmate()
           ? chess.turn() === 'w' ? 'black' : 'white'
           : 'draw';
-        if (room.activeEvent) finalizeEvent(io, room);
+        if (room.activeEvent) { room.activeEvent = null; }
       } else if (chess.isCheck()) {
         // Custom checkmate: king in check but no valid moves after house rules
         const cur = chess.turn() as 'w' | 'b';
@@ -329,7 +308,7 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
         if (legal.length === 0) {
           room.chess.status = 'finished';
           room.chess.winner = cur === 'w' ? 'black' : 'white';
-          if (room.activeEvent) finalizeEvent(io, room);
+          if (room.activeEvent) { room.activeEvent = null; }
         } else if (room.chess.moveCount % MOVES_PER_EVENT === 0) {
           startEvent(io, room);
         }
@@ -403,15 +382,11 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
     io.to(SOCKET_ROOM(roomId)).emit('room:boardUpdate', getBoardUpdate(room));
   });
 
-  socket.on('room:vote', ({ roomId, deviceId, option }: VotePayload) => {
+  socket.on('room:host-pick', ({ roomId, token, choice }: HostPickPayload) => {
     const room = rooms.get(roomId);
     if (!room?.activeEvent) return;
-
-    const event = room.activeEvent;
-    if (event.deviceVotes.has(deviceId)) return;
-
-    event.deviceVotes.set(deviceId, option);
-    event.votes[option]++;
+    if (room.tokens.white !== token) return;
+    finalizeEvent(io, room, choice);
   });
 
   socket.on('room:anthem-ended', ({ roomId }: { roomId: string }) => {
@@ -438,10 +413,12 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
       if (room.sockets.white === socket.id) {
         room.sockets.white = null;
         if (room.chess.status === 'active') room.chess.status = 'waiting';
+        console.log(`[${roomId}] Player WHITE disconnected`);
       }
       if (room.sockets.black === socket.id) {
         room.sockets.black = null;
         if (room.chess.status === 'active') room.chess.status = 'waiting';
+        console.log(`[${roomId}] Player BLACK disconnected`);
       }
       room.sockets.spectators.delete(socket.id);
       room.sockets.audience.delete(socket.id);

@@ -14,31 +14,25 @@
   } @else {
     <div class="setup-grid">
 
-      <div class="qr-card">
-        <h2>Jucătorul 2 — Negru</h2>
-        <p class="hint">Scanează pentru a te alătura ca jucător</p>
-        <img [src]="room.qrJoinBlack" alt="QR Jucător 2" class="qr-img" />
-        <code class="room-code">{{ room.roomId }}</code>
-      </div>
-
-      <div class="actions-panel">
-        <div class="room-badge">
-          <span class="label">Cod meci</span>
-          <span class="code">{{ room.roomId }}</span>
-        </div>
-
-        <button class="btn-primary btn-play" (click)="goToPlay()">
-          Joacă ca Alb →
-        </button>
-
-        <div class="spectate-block">
-          <span class="label">Ecran public (Display)</span>
-          <div class="copy-row">
-            <code>{{ spectateUrl }}</code>
-            <button class="btn-copy" (click)="copySpectateUrl()">Copiază</button>
-          </div>
+      <div class="link-card">
+        <span class="link-label">Link Jucător 2 (Negru)</span>
+        <div class="copy-row">
+          <code class="link-url">{{ joinUrl }}</code>
+          <button class="btn-copy" (click)="copyJoinUrl()">{{ joinCopied ? 'Copiat!' : 'Copiază' }}</button>
         </div>
       </div>
+
+      <div class="link-card">
+        <span class="link-label">Link vizionare (Watch)</span>
+        <div class="copy-row">
+          <code class="link-url">{{ watchUrl }}</code>
+          <button class="btn-copy" (click)="copyWatchUrl()">{{ watchCopied ? 'Copiat!' : 'Copiază' }}</button>
+        </div>
+      </div>
+
+      <button class="btn-primary btn-play" (click)="goToPlay()">
+        Joacă ca Alb →
+      </button>
 
     </div>
   }

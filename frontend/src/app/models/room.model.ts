@@ -62,12 +62,6 @@ export interface EventStart {
   eventId: string;
   question: string;
   options: [string, string];
-  duration: number;
-  secondsLeft: number;
-}
-
-export interface EventTick {
-  secondsLeft: number;
 }
 
 export interface EventResult {

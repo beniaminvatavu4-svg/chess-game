@@ -122,6 +122,24 @@ router.get('/latest', (_req: Request, res: Response) => {
   res.json({ roomId: latest.roomId });
 });
 
+router.get('/latest/join-black', (_req: Request, res: Response) => {
+  let latest: Room | null = null;
+  for (const room of rooms.values()) {
+    if (!latest || room.createdAt > latest.createdAt) latest = room;
+  }
+  if (!latest) { res.status(404).json({ error: 'No rooms' }); return; }
+  res.json({ roomId: latest.roomId, tokenBlack: latest.tokens.black });
+});
+
+router.get('/:id/join-black', (req: Request, res: Response) => {
+  const room = rooms.get(req.params['id'] as string);
+  if (!room) {
+    res.status(404).json({ error: 'Room not found' });
+    return;
+  }
+  res.json({ roomId: room.roomId, tokenBlack: room.tokens.black });
+});
+
 router.get('/:id', (req: Request, res: Response) => {
   const room = rooms.get(req.params['id'] as string);
   if (!room) {

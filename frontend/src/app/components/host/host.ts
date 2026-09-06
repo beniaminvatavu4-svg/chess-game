@@ -15,6 +15,8 @@ export class HostComponent {
   room: CreateRoomResponse | null = null;
   loading = false;
   error = '';
+  joinCopied = false;
+  watchCopied = false;
 
   constructor(
     private roomService: RoomService,
@@ -43,11 +45,24 @@ export class HostComponent {
     });
   }
 
-  get spectateUrl(): string {
-    return this.room ? `${window.location.origin}/spectate/${this.room.roomId}` : '';
+  get joinUrl(): string {
+    if (!this.room) return '';
+    return `${window.location.origin}/join/${this.room.roomId}`;
   }
 
-  copySpectateUrl(): void {
-    if (this.spectateUrl) navigator.clipboard.writeText(this.spectateUrl);
+  get watchUrl(): string {
+    return `${window.location.origin}/watch`;
+  }
+
+  copyJoinUrl(): void {
+    navigator.clipboard.writeText(this.joinUrl);
+    this.joinCopied = true;
+    setTimeout(() => (this.joinCopied = false), 2000);
+  }
+
+  copyWatchUrl(): void {
+    navigator.clipboard.writeText(this.watchUrl);
+    this.watchCopied = true;
+    setTimeout(() => (this.watchCopied = false), 2000);
   }
 }

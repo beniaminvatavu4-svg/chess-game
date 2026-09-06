@@ -45,10 +45,21 @@
 }
 
 .event-question { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
-.event-countdown { font-size: 2rem; font-weight: 700; color: #e94560; margin-bottom: 6px; }
-.event-options { display: flex; gap: 12px; justify-content: center; align-items: center; font-size: 0.95rem; color: #ccc; }
+.event-options { display: flex; gap: 12px; justify-content: center; align-items: center; font-size: 0.95rem; color: #ccc; flex-wrap: wrap; }
 .vs { color: #e94560; font-weight: 700; }
 .event-note { font-size: 0.8rem; color: #888; margin: 6px 0 0; }
+.pick-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 10px; }
+.pick-btn {
+  padding: 10px 28px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: #e94560;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  &:hover { background: #c73452; }
+}
 
 .event-result {
   display: flex;
@@ -132,8 +143,8 @@
   font-family: 'Segoe UI Symbol', 'Noto Chess', 'Apple Color Emoji', sans-serif;
 }
 
-.piece-w { color: #ffffff; }
-.piece-b { color: #1a1a1a; }
+.piece-w { color: #ffffff; text-shadow: 0 0 3px #000, 0 1px 2px #000; }
+.piece-b { color: #1a1a1a; text-shadow: 0 0 2px rgba(255,255,255,0.4); }
 
 // Special pawn overlays
 .flag-svg {
@@ -163,23 +174,49 @@
 .winner-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.88);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  gap: 24px;
+  z-index: 999;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .winner-box {
-  background: #0f3460;
+  background: linear-gradient(135deg, #0f3460, #16213e);
   border: 3px solid #e94560;
-  border-radius: 16px;
-  padding: 40px 60px;
+  border-radius: 20px;
+  padding: 48px 64px;
   text-align: center;
+  box-shadow: 0 0 60px rgba(233,69,96,0.4);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
 }
 
-.winner-trophy { font-size: 4rem; margin-bottom: 12px; }
-.winner-text { font-size: 2rem; font-weight: 700; color: #fff; }
+.winner-trophy { font-size: 5rem; margin-bottom: 16px; }
+.winner-text { font-size: 2.2rem; font-weight: 800; color: #fff; letter-spacing: 1px; }
+.new-game-btn {
+  padding: 14px 40px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: #e94560;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  &:hover { background: #c73452; }
+}
+
+@keyframes popIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
 
 .double-red-dot {
   position: absolute;

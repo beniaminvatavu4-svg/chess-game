@@ -7,7 +7,6 @@ import {
   CreateRoomResponse,
   EventResult,
   EventStart,
-  EventTick,
   RoomState,
 } from '../models/room.model';
 
@@ -21,7 +20,7 @@ export class RoomService implements OnDestroy {
       window.location.hostname === 'localhost'
         ? 'http://localhost:3000'
         : window.location.origin;
-    this.socket = io(url);
+    this.socket = io(url, { transports: ['websocket'] });
   }
 
   // ─── REST ──────────────────────────────────────────────────────────────────
@@ -48,6 +47,14 @@ export class RoomService implements OnDestroy {
     return this.http.get<{ roomId: string }>(`${this.base}/rooms/latest`);
   }
 
+  getLatestJoinBlack(): Observable<{ roomId: string; tokenBlack: string }> {
+    return this.http.get<{ roomId: string; tokenBlack: string }>(`${this.base}/rooms/latest/join-black`);
+  }
+
+  getRoomJoinBlack(roomId: string): Observable<{ roomId: string; tokenBlack: string }> {
+    return this.http.get<{ roomId: string; tokenBlack: string }>(`${this.base}/rooms/${roomId}/join-black`);
+  }
+
   joinAsAudience(roomId: string): void {
     this.socket.emit('room:join', { roomId, role: 'audience' });
   }
@@ -60,8 +67,8 @@ export class RoomService implements OnDestroy {
     this.socket.emit('room:teleport-flag-pawn', { roomId, token, from });
   }
 
-  vote(roomId: string, deviceId: string, option: 0 | 1): void {
-    this.socket.emit('room:vote', { roomId, deviceId, option });
+  hostPick(roomId: string, token: string, choice: 0 | 1): void {
+    this.socket.emit('room:host-pick', { roomId, token, choice });
   }
 
   anthemEnded(roomId: string): void {
@@ -88,13 +95,6 @@ export class RoomService implements OnDestroy {
     return new Observable((obs) => {
       this.socket.on('room:event:start', (d: EventStart) => obs.next(d));
       return () => this.socket.off('room:event:start');
-    });
-  }
-
-  onEventTick(): Observable<EventTick> {
-    return new Observable((obs) => {
-      this.socket.on('room:event:tick', (d: EventTick) => obs.next(d));
-      return () => this.socket.off('room:event:tick');
     });
   }
 

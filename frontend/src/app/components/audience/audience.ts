@@ -22,6 +22,7 @@ export class AudienceComponent implements OnInit, OnDestroy {
 
   hasVoted = false;
   votedOption: 0 | 1 | null = null;
+  errorMessage: string | null = null;
 
   private sub = new Subscription();
 
@@ -59,27 +60,22 @@ export class AudienceComponent implements OnInit, OnDestroy {
     );
 
     this.sub.add(
-      this.roomService.onEventTick().subscribe((tick) => {
-        if (this.activeEvent) {
-          this.activeEvent = { ...this.activeEvent, secondsLeft: tick.secondsLeft };
-        }
-      }),
-    );
-
-    this.sub.add(
       this.roomService.onEventResult().subscribe((result) => {
         this.eventResult = result;
         this.activeEvent = null;
         setTimeout(() => (this.eventResult = null), 6000);
       }),
     );
+
+    this.sub.add(
+      this.roomService.onError().subscribe((err) => {
+        this.errorMessage = err.message;
+      }),
+    );
   }
 
-  vote(option: 0 | 1): void {
-    if (this.hasVoted || !this.activeEvent) return;
-    this.hasVoted = true;
-    this.votedOption = option;
-    this.roomService.vote(this.roomId, this.deviceId, option);
+  vote(_option: 0 | 1): void {
+    // voting via chat — host picks manually
   }
 
   private getOrCreateDeviceId(): string {
