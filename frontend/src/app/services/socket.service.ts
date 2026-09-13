@@ -12,8 +12,10 @@ export class SocketService implements OnDestroy {
       ? 'http://localhost:3000'
       : window.location.origin;
     // Default Engine.IO path (/socket.io) — Nginx strips the /chess prefix
-    // before forwarding, so the backend never sees it either.
-    this.socket = io(url);
+    // before forwarding, so the backend never sees it either. The server
+    // only allows the websocket transport, so the client must too —
+    // otherwise its default polling-first handshake gets rejected.
+    this.socket = io(url, { transports: ['websocket'] });
   }
 
   joinGame(gameId: string, color: 'white' | 'black'): void {
