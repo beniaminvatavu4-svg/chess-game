@@ -105,7 +105,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   get joinUrl(): string {
-    return `${window.location.origin}/game/${this.gameId}?color=black`;
+    return `${document.baseURI.replace(/\/$/, '')}/game/${this.gameId}?color=black`;
   }
 
   copyUrl(): void {

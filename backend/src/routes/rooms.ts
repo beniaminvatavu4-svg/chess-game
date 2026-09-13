@@ -44,7 +44,7 @@ function generateSpecialPawns(chess: Chess): Room['specialPawns'] {
 
 router.post('/', async (req: Request, res: Response) => {
   const host = req.get('host') ?? 'localhost:3000';
-  const origin = process.env.CLIENT_URL ?? `${req.protocol}://${host}`;
+  const origin = process.env.PUBLIC_URL ?? `${req.protocol}://${host}`;
 
   let roomId = generateRoomId();
   while (rooms.has(roomId)) roomId = generateRoomId();

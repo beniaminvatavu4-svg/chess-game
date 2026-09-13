@@ -47,11 +47,11 @@ export class HostComponent {
 
   get joinUrl(): string {
     if (!this.room) return '';
-    return `${window.location.origin}/join/${this.room.roomId}`;
+    return `${document.baseURI.replace(/\/$/, '')}/join/${this.room.roomId}`;
   }
 
   get watchUrl(): string {
-    return `${window.location.origin}/watch`;
+    return `${document.baseURI.replace(/\/$/, '')}/watch`;
   }
 
   copyJoinUrl(): void {

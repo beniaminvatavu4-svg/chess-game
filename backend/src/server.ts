@@ -12,6 +12,8 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:4200';
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
+  // Default Engine.IO path (/socket.io) — Nginx strips the /chess prefix
+  // before forwarding, so this server never sees it either.
   cors: { origin: CLIENT_URL, methods: ['GET', 'POST'] },
   transports: ['websocket'],
   pingTimeout: 60000,
