@@ -5,7 +5,7 @@ import { Game } from '../models/game.model';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly base = '/api';
+  private readonly base = 'api';
 
   constructor(private http: HttpClient) {}
 

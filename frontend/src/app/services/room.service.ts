@@ -13,14 +13,14 @@ import {
 @Injectable({ providedIn: 'root' })
 export class RoomService implements OnDestroy {
   private socket: Socket;
-  private readonly base = '/api';
+  private readonly base = 'api';
 
   constructor(private http: HttpClient) {
     const url =
       window.location.hostname === 'localhost'
         ? 'http://localhost:3000'
         : window.location.origin;
-    this.socket = io(url, { transports: ['websocket'] });
+    this.socket = io(url, { transports: ['websocket'], path: '/chess/socket.io' });
   }
 
   // ─── REST ──────────────────────────────────────────────────────────────────

@@ -11,7 +11,7 @@ export class SocketService implements OnDestroy {
     const url = window.location.hostname === 'localhost'
       ? 'http://localhost:3000'
       : window.location.origin;
-    this.socket = io(url);
+    this.socket = io(url, { path: '/chess/socket.io' });
   }
 
   joinGame(gameId: string, color: 'white' | 'black'): void {

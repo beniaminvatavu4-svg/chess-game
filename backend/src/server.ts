@@ -12,6 +12,7 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:4200';
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
+  path: '/chess/socket.io',
   cors: { origin: CLIENT_URL, methods: ['GET', 'POST'] },
   transports: ['websocket'],
   pingTimeout: 60000,
