@@ -16,13 +16,15 @@ export class RoomService implements OnDestroy {
   private readonly base = 'api';
 
   constructor(private http: HttpClient) {
-    const url =
-      window.location.hostname === 'localhost'
-        ? 'http://localhost:3000'
-        : window.location.origin;
-    // Default Engine.IO path (/socket.io) — Nginx strips the /chess prefix
-    // before forwarding, so the backend never sees it either.
-    this.socket = io(url, { transports: ['websocket'] });
+    const isLocal = window.location.hostname === 'localhost';
+    const url = isLocal ? 'http://localhost:3000' : window.location.origin;
+    // In prod, Nginx only routes /chess/* to this backend and strips the
+    // /chess prefix before forwarding — so the client must request
+    // /chess/socket.io (to match Nginx's location block) while the
+    // server itself stays on the Engine.IO default /socket.io (what it
+    // actually receives post-strip). Local dev has no such proxy prefix.
+    const path = isLocal ? '/socket.io' : '/chess/socket.io';
+    this.socket = io(url, { transports: ['websocket'], path });
   }
 
   // ─── REST ──────────────────────────────────────────────────────────────────
