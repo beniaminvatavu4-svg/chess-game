@@ -20,7 +20,9 @@ export class RoomService implements OnDestroy {
       window.location.hostname === 'localhost'
         ? 'http://localhost:3000'
         : window.location.origin;
-    this.socket = io(url, { transports: ['websocket'], path: '/chess/socket.io' });
+    // Default Engine.IO path (/socket.io) — Nginx strips the /chess prefix
+    // before forwarding, so the backend never sees it either.
+    this.socket = io(url, { transports: ['websocket'] });
   }
 
   // ─── REST ──────────────────────────────────────────────────────────────────
